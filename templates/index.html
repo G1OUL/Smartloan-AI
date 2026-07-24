@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartLoan AI - AI-Powered Loan Advisory Platform</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="app-container">
+        
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="brand-section">
+                <div class="brand-icon">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H7c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.04-.42 1.99-1.07 2.75z"/>
+                    </svg>
+                </div>
+                <div class="brand-title">
+                    <h1 data-i18n="brand">SmartLoan AI</h1>
+                    <p data-i18n="tagline">AI Advisory Platform</p>
+                </div>
+            </div>
+            <nav style="flex-grow: 1;">
+                <ul class="menu-list">
+                    <li class="menu-item active" id="nav-dashboard-item">
+                        <a href="#dashboard">
+                            <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+                            <span data-i18n="nav_dashboard">Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="menu-item" id="nav-apply-item">
+                        <a href="#apply">
+                            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                            <span data-i18n="nav_apply">Check Eligibility</span>
+                        </a>
+                    </li>
+                    <li class="menu-item" id="nav-calculator-item">
+                        <a href="#calculator">
+                            <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-4 6h-2v2h2V9zm-4 0H9v2h2V9zm-2 4h2v2H7v-2zm4 0h2v2h-2v-2zm4 0h2v2h-2v-2zm-8 4h10v2H7v-2z"/></svg>
+                            <span data-i18n="nav_calculator">EMI Calculator</span>
+                        </a>
+                    </li>
+                    <li class="menu-item" id="nav-history-item" style="display: none;">
+                        <a href="#history">
+                            <svg viewBox="0 0 24 24"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
+                            <span data-i18n="nav_history">Loan History</span>
+                        </a>
+                    </li>
+                    <li class="menu-item" id="nav-admin-item" style="display: none;">
+                        <a href="#admin">
+                            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2-2.76 0-5 2.24-5 5h2c0-1.66 1.34-3 3-3s3 1.34 3 3c0 .55-.22 1.05-.59 1.41z"/></svg>
+                            <span data-i18n="nav_admin">Admin Portal</span>
+                        </a>
+                    </li>
+                    <li class="menu-item" id="nav-login-item">
+                        <a href="#auth">
+                            <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                            <span data-i18n="nav_login">Login / Sign Up</span>
+                        </a>
+                    </li>
+                    <li class="menu-item" id="nav-logout-item" style="display: none;">
+                        <a href="#logout">
+                            <svg viewBox="0 0 24 24"><path d="M10.09 15.59L11.5 17l5-5-5-5-1.41 1.41L12.67 11H3v2h9.67l-2.58 2.59zM19 3H5c-1.11 0-2 .9-2 2v4h2V5h14v14H5v-4H3v4c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg>
+                            <span data-i18n="nav_logout">Logout</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            <!-- Sidebar User profile component -->
+            <div class="user-widget" id="sidebar-user-widget" style="display: none;">
+                <div class="user-info">
+                    <div class="user-avatar" id="widget-avatar">U</div>
+                    <div class="user-details">
+                        <h4 id="widget-username">Borrower</h4>
+                        <div class="user-badge" id="widget-usertype">Borrower</div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+        <!-- Main Content Viewport -->
+        <main class="main-content">
+            
+            <!-- Top Controls Header -->
+            <div class="top-header">
+                <div class="header-title">
+                    <h2 data-i18n="brand">SmartLoan AI</h2>
+                    <p data-i18n="tagline" style="color: var(--secondary);">AI-Powered Loan Advisory Platform</p>
+                </div>
+                <div class="header-controls">
+                    <select id="lang-select" class="lang-selector" onchange="changeLanguage(this.value)">
+                        <option value="en">English (EN)</option>
+                        <option value="hi">हिंदी (HI)</option>
+                        <option value="mr">मराठी (MR)</option>
+                        <option value="gu">ગુજરાતી (GU)</option>
+                        <option value="ta">தமிழ் (TA)</option>
+                    </select>
+                </div>
+            </div>
+            <!-- Guest Alert Message -->
+            <div class="guest-alert" id="guest-alert">
+                <div class="guest-alert-text">
+                    <span data-i18n="msg_guest_alert">Register an account or Log In to save your searches, view custom document guidance, and access your profile history!</span>
+                </div>
+                <button class="btn btn-secondary btn-sm" onclick="switchTab('auth')" data-i18n="nav_login">Login / Sign Up</button>
+            </div>
+            <!-- First-Time Applicant Tip Widget -->
+            <div class="tip-widget" id="first-time-tip-widget" style="display: none;">
+                <div style="font-size: 1.5rem;">💡</div>
+                <div>
+                    <span data-i18n="msg_first_time_tip">First-Time Applicant Tip: Try to choose loans with a lower 'Total Cost' rather than just focusing on a low interest rate. Lower processing fees and zero prepayment penalties save money in the long run!</span>
+                </div>
+            </div>
+            <!-- TAB 1: DASHBOARD -->
+            <div id="dashboard" class="tab-container active">
+                <div class="glass-card" style="background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(6, 182, 212, 0.1) 100%);">
+                    <h2 style="font-size: 2.25rem; margin-bottom: 1rem; color: #fff;">Smart Loan Matcher Engine</h2>
+                    <p style="font-size: 1.1rem; margin-bottom: 2rem; max-width: 800px;">
+                        Evaluate approval odds, calculate exact EMI options, identify hidden processing and insurance fees, and receive custom guidelines for top lending partners in India.
+                    </p>
+                    <div style="display: flex; gap: 1rem;">
+                        <button class="btn btn-primary" onclick="switchTab('apply')" data-i18n="nav_apply">Check Eligibility</button>
+                        <button class="btn btn-outline" onclick="switchTab('calculator')" data-i18n="nav_calculator">EMI Calculator</button>
+                    </div>
+                </div>
+                <div class="grid-3">
+                    <div class="glass-card interactive" onclick="switchTab('apply')">
+                        <div style="font-size: 2rem; margin-bottom: 1rem;">⚡</div>
+                        <h3 style="margin-bottom: 0.5rem;" data-i18n="nav_apply">Check Eligibility</h3>
+                        <p style="font-size: 0.9rem;">Fill a single questionnaire to evaluate pre-approvals across multiple institutions.</p>
+                    </div>
+                    <div class="glass-card interactive" onclick="switchTab('calculator')">
+                        <div style="font-size: 2rem; margin-bottom: 1rem;">📊</div>
+                        <h3 style="margin-bottom: 0.5rem;" data-i18n="nav_calculator">EMI Calculator</h3>
+                        <p style="font-size: 0.9rem;">Interact with variables to optimize total repayment and interest expense.</p>
+                    </div>
+                    <div class="glass-card interactive" id="dashboard-docs-card" onclick="switchTab('apply')">
+                        <div style="font-size: 2rem; margin-bottom: 1rem;">📋</div>
+                        <h3 style="margin-bottom: 0.5rem;" data-i18n="nav_docs">Document Help</h3>
+                        <p style="font-size: 0.9rem;">Identify missing elements based on application profiles, and get advice on how to fetch them.</p>
+                    </div>
+                </div>
+                
+                <!-- Guest Educational Guide -->
+                <div class="glass-card" style="margin-top: 1.5rem;">
+                    <h3 style="font-size: 1.5rem; margin-bottom: 0.5rem;" data-i18n="edu_title">Financial Literacy & Educational Guide</h3>
+                    <p style="font-size: 0.9rem; margin-bottom: 2rem;" data-i18n="edu_subtitle">Simplified guidelines to help you make smart borrowing decisions.</p>
+                    
+                    <div class="grid-2">
+                        <div class="advice-card" style="background: rgba(6, 182, 212, 0.03); border-left-color: var(--secondary);">
+                            <h4 style="font-size: 1.1rem; margin-bottom: 0.5rem; color: #fff;" data-i18n="edu_cibil_title">1. Understanding Credit Score (CIBIL)</h4>
+                            <p style="font-size: 0.85rem;" data-i18n="edu_cibil_desc">Your CIBIL score is a 3-digit number (300-900) summarizing your credit history. Scores above 750 get faster approvals and lower interest rates. Applying to multiple banks at once creates multiple 'hard inquiries' which lowers your score.</p>
+                        </div>
+                        <div class="advice-card" style="background: rgba(6, 182, 212, 0.03); border-left-color: var(--secondary);">
+                            <h4 style="font-size: 1.1rem; margin-bottom: 0.5rem; color: #fff;" data-i18n="edu_dti_title">2. What is Debt-To-Income (DTI)?</h4>
+                            <p style="font-size: 0.85rem;" data-i18n="edu_dti_desc">DTI measures how much of your monthly income goes toward paying debts (including the new EMI). Lenders prefer a DTI below 50%. A high DTI makes banks see you as high-risk.</p>
+                        </div>
+                        <div class="advice-card" style="background: rgba(6, 182, 212, 0.03); border-left-color: var(--secondary);">
+                            <h4 style="font-size: 1.1rem; margin-bottom: 0.5rem; color: #fff;" data-i18n="edu_costs_title">3. Looking Beyond Interest Rates</h4>
+                            <p style="font-size: 0.85rem;" data-i18n="edu_costs_desc">Processing fees (which can be flat or percentage-based) and insurance premiums are often added to the loan cost. A loan with 9% rate and high fees might cost more than a 9.5% loan with zero fees.</p>
+                        </div>
+                        <div class="advice-card" style="background: rgba(6, 182, 212, 0.03); border-left-color: var(--secondary);">
+                            <h4 style="font-size: 1.1rem; margin-bottom: 0.5rem; color: #fff;" data-i18n="edu_prepay_title">4. Prepayment Penalties</h4>
+                            <p style="font-size: 0.85rem;" data-i18n="edu_prepay_desc">If you get extra funds and want to close your loan early, some banks charge a prepayment penalty (e.g. 2-4% of outstanding principal). Look for loans with 0% prepayment penalty if you plan early closure.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- TAB 2: CHECK ELIGIBILITY / RECOMMENDATIONS -->
+            <div id="apply" class="tab-container">
+                <div class="glass-card">
+                    <h3 style="font-size: 1.5rem; margin-bottom: 0.5rem;" data-i18n="form_title">Loan Eligibility Application</h3>
+                    <p style="font-size: 0.9rem; margin-bottom: 2rem;" data-i18n="form_subtitle">Enter your financial details to instantly match and compare offers across top lenders.</p>
+                    
+                    <form id="eligibility-form">
+                        <div class="grid-3">
+                            <div class="form-group">
+                                <label for="form-loan-type" data-i18n="lbl_loan_type">Select Loan Type</label>
+                                <select id="form-loan-type" class="form-select">
+                                    <option value="Personal" data-i18n="opt_personal">Personal Loan</option>
+                                    <option value="Home" data-i18n="opt_home">Home Loan</option>
+                                    <option value="Education" data-i18n="opt_education">Education Loan</option>
+                                    <option value="Business" data-i18n="opt_business">Business Loan</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="form-employment" data-i18n="lbl_employment">Employment Status</label>
+                                <select id="form-employment" class="form-select">
+                                    <option value="Salaried" data-i18n="opt_salaried">Salaried Professional</option>
+                                    <option value="Self-Employed" data-i18n="opt_self_employed">Self-Employed / Business</option>
+                                    <option value="Unemployed" data-i18n="opt_unemployed">Unemployed / Student</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="form-credit" data-i18n="lbl_credit">CIBIL Credit Score (300 - 900)</label>
+                                <input type="number" id="form-credit" class="form-input" min="300" max="900" value="750" required>
+                            </div>
+                        </div>
+                        <div class="grid-4">
+                            <div class="form-group">
+                                <label for="form-income" data-i18n="lbl_income">Monthly Net Income (₹)</label>
+                                <input type="number" id="form-income" class="form-input" min="1" value="50000" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="form-emis" data-i18n="lbl_emis">Existing Monthly EMIs (₹)</label>
+                                <input type="number" id="form-emis" class="form-input" min="0" value="5000">
+                            </div>
+                            <div class="form-group">
+                                <label for="form-amount" data-i18n="lbl_amount">Required Loan Amount (₹)</label>
+                                <input type="number" id="form-amount" class="form-input" min="1" value="500000" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="form-tenure" data-i18n="lbl_tenure">Repayment Tenure (Years)</label>
+                                <input type="number" id="form-tenure" class="form-input" min="1" max="30" value="5" required>
+                            </div>
+                        </div>
+                        <div style="display: flex; justify-content: flex-end; margin-top: 1rem;">
+                            <button type="submit" class="btn btn-primary" data-i18n="btn_submit">Analyze & Recommend</button>
+                        </div>
+                    </form>
+                </div>
+                <!-- Results Output Grid -->
+                <div id="results-section" class="glass-card" style="display: block;">
+                    <h3 style="font-size: 1.5rem; margin-bottom: 0.5rem;" data-i18n="res_title">AI-Generated Loan Recommendations</h3>
+                    <p style="font-size: 0.9rem; margin-bottom: 2.5rem;" data-i18n="res_subtitle">Sorted by your highest approval probability and lowest lifetime cost.</p>
+                    
+                    <div style="overflow-x: auto;">
+                        <table class="offers-table">
+                            <thead>
+                                <tr>
+                                    <th data-i18n="col_bank">Lender & Loan Product</th>
+                                    <th data-i18n="col_interest">Interest Rate (p.a.)</th>
+                                    <th data-i18n="col_emi">Monthly EMI</th>
+                                    <th data-i18n="col_prob">Approval Probability</th>
+                                    <th data-i18n="col_cost">Total Repayment</th>
+                                    <th data-i18n="col_action">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="offers-table-body">
+                                <tr>
+                                    <td colspan="6" style="text-align: center; padding: 2rem; color: var(--text-muted);">Please fill and submit the eligibility questionnaire to discover offers.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <!-- Document Checklist Assistant widget -->
+                <div class="grid-2">
+                    <div id="document-assistant-card" class="glass-card" style="display: none;">
+                        <h3 style="font-size: 1.5rem; margin-bottom: 0.5rem;" data-i18n="docs_title">Document Assistant & Guidance</h3>
+                        <p style="font-size: 0.9rem; margin-bottom: 2rem;" data-i18n="docs_subtitle">Check your required documents checklist based on your application profiles.</p>
+                        
+                        <h4 style="margin-bottom: 1rem; font-size: 1rem;" data-i18n="docs_check">Mark documents you have ready:</h4>
+                        <div class="doc-section">
+                            <div class="doc-list-checklist" id="document-checklist-items"></div>
+                            
+                            <h4 style="margin-top: 1rem; margin-bottom: 1rem; font-size: 1rem;" data-i18n="docs_missing">Guidance for missing or unavailable documents:</h4>
+                            <div id="document-checklist-guidance" style="display: flex; flex-direction: column; gap: 0.5rem;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- TAB 3: EMI CALCULATOR -->
+            <div id="calculator" class="tab-container">
+                <div class="glass-card">
+                    <h3 style="font-size: 1.5rem; margin-bottom: 0.5rem;" data-i18n="calc_title">Interactive EMI Calculator</h3>
+                    <p style="font-size: 0.9rem; margin-bottom: 2rem;" data-i18n="calc_subtitle">Quickly estimate your monthly repayment. Adjust values to optimize your loan structure.</p>
+                    
+                    <div class="calc-layout">
+                        <div>
+                            <!-- Amount Slider -->
+                            <div class="slider-container">
+                                <div class="slider-header">
+                                    <span data-i18n="lbl_amount">Required Loan Amount (₹)</span>
+                                    <span id="calc-principal-val" class="slider-val">₹5,00,000</span>
+                                </div>
+                                <input type="range" id="calc-principal-range" class="range-slider" min="50000" max="10000000" step="50000" value="500000">
+                            </div>
+                            <!-- ROI Slider -->
+                            <div class="slider-container">
+                                <div class="slider-header">
+                                    <span data-i18n="col_interest">Interest Rate (p.a.)</span>
+                                    <span id="calc-rate-val" class="slider-val">9.5%</span>
+                                </div>
+                                <input type="range" id="calc-rate-range" class="range-slider" min="5" max="25" step="0.1" value="9.5">
+                            </div>
+                            <!-- Tenure Slider -->
+                            <div class="slider-container">
+                                <div class="slider-header">
+                                    <span data-i18n="lbl_tenure">Repayment Tenure (Years)</span>
+                                    <span id="calc-tenure-val" class="slider-val">5 Years</span>
+                                </div>
+                                <input type="range" id="calc-tenure-range" class="range-slider" min="1" max="30" step="1" value="5">
+                            </div>
+                        </div>
+                        <!-- Results Panel -->
+                        <div class="calc-summary-panel">
+                            <span data-i18n="calc_emi" style="color: var(--text-secondary); font-size: 0.95rem; font-weight: 500;">Estimated Monthly EMI</span>
+                            <div id="calc-emi-result" class="emi-value-big">₹10,501</div>
+                            
+                            <div class="calc-breakdown-row">
+                                <span data-i18n="calc_principal">Principal Amount</span>
+                                <span id="calc-principal-result" style="font-weight:700;">₹5,00,000</span>
+                            </div>
+                            <div class="calc-breakdown-row">
+                                <span data-i18n="calc_interest">Total Interest Payable</span>
+                                <span id="calc-interest-result" style="font-weight:700; color: var(--secondary);">₹1,30,060</span>
+                            </div>
+                            <div class="calc-breakdown-row">
+                                <span data-i18n="calc_total">Total Amount Payable</span>
+                                <span id="calc-total-result" style="font-weight:700; color: #fff;">₹6,30,060</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- TAB 4: LOAN HISTORY -->
+            <div id="history" class="tab-container">
+                <div class="history-section">
+                    <h3 style="font-size: 1.5rem; margin-bottom: 0.5rem;" data-i18n="hist_title">Your Loan Search History</h3>
+                    <p style="font-size: 0.9rem; margin-bottom: 2rem;" data-i18n="hist_subtitle">Track your past searches and recommendations saved on our platform.</p>
+                    
+                    <div id="history-list-container"></div>
+                </div>
+            </div>
+            <!-- TAB 5: LOGIN / SIGN UP -->
+            <div id="auth" class="tab-container">
+                <div class="auth-box glass-card">
+                    <div class="auth-tabs">
+                        <button id="auth-tab-login-btn" class="auth-tab active" onclick="toggleAuthTab('login')" data-i18n="auth_tab_login">Login</button>
+                        <button id="auth-tab-reg-btn" class="auth-tab" onclick="toggleAuthTab('register')" data-i18n="auth_tab_register">Register Account</button>
+                    </div>
+                    <!-- Login Form -->
+                    <div id="login-form-box">
+                        <form id="login-form-el">
+                            <div class="form-group">
+                                <label for="login-username" data-i18n="lbl_username">Username</label>
+                                <input type="text" id="login-username" class="form-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="login-password" data-i18n="lbl_password">Password</label>
+                                <input type="password" id="login-password" class="form-input" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;" data-i18n="btn_login">Access Account</button>
+                        </form>
+                    </div>
+                    <!-- Register Form -->
+                    <div id="register-form-box" style="display: none;">
+                        <form id="register-form-el">
+                            <div class="form-group">
+                                <label for="reg-username" data-i18n="lbl_username">Username</label>
+                                <input type="text" id="reg-username" class="form-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="reg-email" data-i18n="lbl_email">Email Address</label>
+                                <input type="email" id="reg-email" class="form-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="reg-password" data-i18n="lbl_password">Password</label>
+                                <input type="password" id="reg-password" class="form-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="reg-first-time" data-i18n="lbl_user_type">Are you a first-time loan applicant?</label>
+                                <select id="reg-first-time" class="form-select">
+                                    <option value="first_time" data-i18n="opt_yes_first">Yes, I am a first-time applicant (Show extra help)</option>
+                                    <option value="registered" data-i18n="opt_no_first">No, I have experience with loans</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-secondary" style="width: 100%; margin-top: 1rem;" data-i18n="btn_register">Create Account</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <!-- TAB 6: ADMIN PORTAL -->
+            <div id="admin" class="tab-container">
+                <div class="glass-card">
+                    <h3 style="font-size: 1.5rem; margin-bottom: 0.5rem;" data-i18n="admin_title">Lender Product Management Dashboard</h3>
+                    <p style="font-size: 0.9rem; margin-bottom: 2rem;" data-i18n="admin_subtitle">Add, modify, or remove loan products from the SmartLoan AI engine.</p>
+                    
+                    <div class="analytics-grid" style="margin-bottom: 2rem;">
+                        <div class="analytics-card">
+                            <h5 data-i18n="admin_total_users">Total Registered Borrowers</h5>
+                            <p id="stat-users">0</p>
+                        </div>
+                        <div class="analytics-card">
+                            <h5 data-i18n="admin_total_apps">Total Applications Run</h5>
+                            <p id="stat-apps">0</p>
+                        </div>
+                        <div class="analytics-card">
+                            <h5 data-i18n="admin_avg_cibil">Average Applicant CIBIL</h5>
+                            <p id="stat-cibil">0</p>
+                        </div>
+                        <div class="analytics-card">
+                            <h5 data-i18n="admin_avg_amount">Average Requested Loan</h5>
+                            <p id="stat-amount">₹0</p>
+                        </div>
+                        <div class="analytics-card">
+                            <h5 data-i18n="admin_popular">Most Popular Loan Type</h5>
+                            <p id="stat-popular">None</p>
+                        </div>
+                    </div>
+                    <div style="overflow-x: auto;">
+                        <table class="offers-table">
+                            <thead>
+                                <tr>
+                                    <th data-i18n="col_bank">Lender & Loan Product</th>
+                                    <th>Loan Type</th>
+                                    <th data-i18n="col_interest">Interest Rate (p.a.)</th>
+                                    <th>Eligibility Benchmarks</th>
+                                    <th>Fee Profile</th>
+                                    <th data-i18n="tbl_actions">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-lenders-table-body">
+                                <tr>
+                                    <td colspan="6" style="text-align:center;">Loading configured lender products...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <!-- Add product card -->
+                <div class="glass-card" style="margin-top: 1.5rem;">
+                    <h4 style="font-size: 1.25rem; margin-bottom: 1.5rem;" data-i18n="btn_add_lender">Add New Loan Product</h4>
+                    
+                    <form id="admin-add-lender-form">
+                        <div class="grid-3">
+                            <div class="form-group">
+                                <label for="adm-name">Lender Institution Name</label>
+                                <input type="text" id="adm-name" class="form-input" placeholder="e.g., State Bank of India" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="adm-loan-name">Loan Product Subname</label>
+                                <input type="text" id="adm-loan-name" class="form-input" placeholder="e.g., Express Personal Loan" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="adm-loan-type" data-i18n="lbl_loan_type">Select Loan Type</label>
+                                <select id="adm-loan-type" class="form-select">
+                                    <option value="Personal">Personal</option>
+                                    <option value="Home">Home</option>
+                                    <option value="Education">Education</option>
+                                    <option value="Business">Business</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="grid-4">
+                            <div class="form-group">
+                                <label for="adm-min-credit">Minimum CIBIL Score</label>
+                                <input type="number" id="adm-min-credit" class="form-input" value="650" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="adm-min-income">Minimum Income (Monthly ₹)</label>
+                                <input type="number" id="adm-min-income" class="form-input" value="25000" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="adm-max-dti">Maximum Allowed DTI Ratio</label>
+                                <input type="number" id="adm-max-dti" class="form-input" step="0.05" value="0.50" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="adm-rate">Interest Rate (% p.a.)</label>
+                                <input type="number" id="adm-rate" class="form-input" step="0.05" value="10.5" required>
+                            </div>
+                        </div>
+                        <div class="grid-4">
+                            <div class="form-group">
+                                <label for="adm-fee-pct">Processing Fee (%)</label>
+                                <input type="number" id="adm-fee-pct" class="form-input" step="0.1" value="1.0" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="adm-fee-flat">Flat Processing Charge (₹)</label>
+                                <input type="number" id="adm-fee-flat" class="form-input" value="1000" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="adm-ins-pct">Mandatory Insurance (%)</label>
+                                <input type="number" id="adm-ins-pct" class="form-input" step="0.1" value="0.5" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="adm-prep-pct">Prepayment Penalty (%)</label>
+                                <input type="number" id="adm-prep-pct" class="form-input" step="0.1" value="2.0" required>
+                            </div>
+                        </div>
+                        <div class="grid-3">
+                            <div class="form-group">
+                                <label for="adm-tenure-min">Minimum Tenure (Years)</label>
+                                <input type="number" id="adm-tenure-min" class="form-input" value="1" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="adm-tenure-max">Maximum Tenure (Years)</label>
+                                <input type="number" id="adm-tenure-max" class="form-input" value="7" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="adm-docs">Required Docs (Semi-colon separated)</label>
+                                <input type="text" id="adm-docs" class="form-input" value="PAN Card;Aadhaar Card;Salary Slips;Bank Statement (6 months)" required>
+                            </div>
+                        </div>
+                        <div style="display: flex; justify-content: flex-end; margin-top: 1rem;">
+                            <button type="submit" class="btn btn-secondary" data-i18n="btn_add_lender">Add New Loan Product</button>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- User Management Card -->
+                <div class="glass-card" style="margin-top: 1.5rem;">
+                    <h3 style="font-size: 1.5rem; margin-bottom: 0.5rem;" data-i18n="admin_users_title">Manage User Accounts</h3>
+                    <p style="font-size: 0.9rem; margin-bottom: 2rem;" data-i18n="admin_users_subtitle">Change user authorization levels or delete profiles.</p>
+                    
+                    <div style="overflow-x: auto;">
+                        <table class="offers-table">
+                            <thead>
+                                <tr>
+                                    <th data-i18n="tbl_username">Username</th>
+                                    <th data-i18n="tbl_email">Email Address</th>
+                                    <th data-i18n="tbl_usertype">User Level</th>
+                                    <th data-i18n="tbl_created">Registered At</th>
+                                    <th data-i18n="tbl_actions">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-users-table-body">
+                                <tr>
+                                    <td colspan="5" style="text-align:center;">Loading registered accounts...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <!-- Compare Bottom Floating Tray -->
+        <div id="compare-tray" class="compare-tray">
+            <div class="compare-selections" id="compare-bubbles"></div>
+            <button id="compare-action-btn" class="btn btn-primary btn-sm" onclick="triggerCompareResults()" disabled data-i18n="btn_compare">Compare Selected</button>
+        </div>
+        <!-- DETAILS BREAKDOWN MODAL -->
+        <div id="details-modal" class="modal-overlay">
+            <div class="modal-box">
+                <div class="modal-header">
+                    <div>
+                        <h3 id="modal-lender-title" style="margin-bottom: 0.25rem;">SBI Maxgain</h3>
+                        <p id="modal-product-title" style="color: var(--secondary); font-size: 0.85rem; font-weight: 500;">Home Loan</p>
+                    </div>
+                    <button class="modal-close-btn" onclick="closeModal()">×</button>
+                </div>
+                <div class="modal-body">
+                    <h4 data-i18n="details_title">Loan Cost & Transparency Breakdown</h4>
+                    
+                    <div class="details-grid">
+                        <div class="details-item">
+                            <h5 data-i18n="det_emi">Monthly EMI Payment:</h5>
+                            <p id="det-emi-val">₹0</p>
+                        </div>
+                        <div class="details-item">
+                            <h5 data-i18n="det_interest">Total Interest Paid:</h5>
+                            <p id="det-interest-val" style="color: var(--secondary);">₹0</p>
+                        </div>
+                        <div class="details-item">
+                            <h5 data-i18n="det_fee">Processing Fees:</h5>
+                            <p id="det-fee-val">₹0</p>
+                        </div>
+                        <div class="details-item">
+                            <h5 data-i18n="det_insurance">Insurance Premium:</h5>
+                            <p id="det-insurance-val">₹0</p>
+                        </div>
+                        <div class="details-item" style="grid-column: span 2; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 0.75rem;">
+                            <h5 data-i18n="det_total">Total Cost of Borrowing:</h5>
+                            <p id="det-total-val" style="font-size: 1.4rem; color: var(--accent-green);">₹0</p>
+                        </div>
+                        <div class="details-item" style="grid-column: span 2;">
+                            <h5 data-i18n="det_prepayment">Prepayment Penalty:</h5>
+                            <p id="det-prepayment-val" style="font-size: 0.95rem;">0%</p>
+                        </div>
+                    </div>
+                    <!-- AI remarks -->
+                    <div class="advice-card">
+                        <h5 data-i18n="det_advice" style="color: var(--primary); font-size: 0.75rem; text-transform: uppercase; margin-bottom: 0.5rem; font-weight: 700;">AI Advisor Commentary:</h5>
+                        <p id="det-advice-val">Commentary loading...</p>
+                    </div>
+                    <!-- Rejection reasons if any -->
+                    <div id="det-rejection-reasons" style="display: none;">
+                        <h5 style="color: var(--accent-red); font-size: 0.8rem; text-transform: uppercase; margin-bottom: 0.5rem; font-weight: 700;">Rejection Flags:</h5>
+                        <ul id="det-rejection-list" style="list-style: none; padding-left: 0.5rem;"></ul>
+                    </div>
+                    <!-- Docs required list -->
+                    <div>
+                        <h5 data-i18n="det_docs" style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.5rem; font-weight: 700;">Required Documentation:</h5>
+                        <ul id="det-docs-list" style="list-style: none; padding-left: 0.5rem;"></ul>
+                    </div>
+                    <div style="display: flex; justify-content: flex-end; margin-top: 1rem;">
+                        <button class="btn btn-outline" onclick="closeModal()" data-i18n="btn_close">Close Window</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- COMPARE SIDE-BY-SIDE MODAL -->
+        <div id="compare-modal" class="modal-overlay">
+            <div class="modal-box" style="width: 900px; max-width: 95%;">
+                <div class="modal-header">
+                    <div>
+                        <h3 data-i18n="btn_compare">Compare Loan Offers</h3>
+                        <p style="color: var(--secondary); font-size: 0.85rem; font-weight: 500;">Side-by-Side Comparison Matrix</p>
+                    </div>
+                    <button class="modal-close-btn" onclick="closeModal()">×</button>
+                </div>
+                <div class="modal-body">
+                    <div class="compare-grid" id="compare-grid-container"></div>
+                    
+                    <div style="display: flex; justify-content: flex-end; margin-top: 1.5rem;">
+                        <button class="btn btn-outline" onclick="closeModal()" data-i18n="btn_close">Close Window</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Translations & App scripts -->
+    <script src="{{ url_for('static', filename='js/translations.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
