@@ -2,6 +2,7 @@ let currentUser = null;
 let currentLang = 'en';
 let cachedOffers = [];
 let selectedCompareIds = [];
+
 document.addEventListener("DOMContentLoaded", () => {
     // 1. Check Auth Status on load
     checkAuth();
@@ -11,15 +12,23 @@ document.addEventListener("DOMContentLoaded", () => {
     if (savedLang && translations[savedLang]) {
         currentLang = savedLang;
     }
-    document.getElementById("lang-select").value = currentLang;
+    const langSelect = document.getElementById("lang-select");
+    if (langSelect) langSelect.value = currentLang;
     applyTranslations();
+
     // 3. Setup Navigation Event Listeners
     setupNav();
+
     // 4. Setup Form Event Listeners
     setupForms();
+
     // 5. Setup Live Calculator Sliders
     setupCalculatorSliders();
+
+    // 6. Setup CIBIL Simulator
+    setupCibilSimulator();
 });
+
 // Auth Status Checker
 function checkAuth() {
     fetch('/api/auth/me')
@@ -28,7 +37,6 @@ function checkAuth() {
             if (data.user) {
                 currentUser = data.user;
                 updateUserUI();
-                // Load history if on registered account
                 loadHistory();
             } else {
                 currentUser = null;
@@ -38,6 +46,7 @@ function checkAuth() {
         })
         .catch(err => console.error("Auth check failed:", err));
 }
+
 // UI updates based on logged in user
 function updateUserUI() {
     const guestAlert = document.getElementById("guest-alert");
@@ -50,14 +59,13 @@ function updateUserUI() {
     const userAvatar = document.getElementById("widget-avatar");
     const usernameLbl = document.getElementById("widget-username");
     const userTypeLbl = document.getElementById("widget-usertype");
+
     if (currentUser) {
-        // User logged in
         if (guestAlert) guestAlert.style.display = 'none';
         if (navLogin) navLogin.style.display = 'none';
         if (navLogout) navLogout.style.display = 'block';
         if (navHistory) navHistory.style.display = 'block';
         
-        // Show Admin tab if admin
         if (currentUser.user_type === 'admin') {
             if (navAdmin) navAdmin.style.display = 'block';
             loadAdminLenders();
@@ -66,13 +74,14 @@ function updateUserUI() {
         } else {
             if (navAdmin) navAdmin.style.display = 'none';
         }
-        // Sidebar Widget
-        userWidget.style.display = 'flex';
-        userAvatar.innerText = currentUser.username.substring(0, 2).toUpperCase();
-        usernameLbl.innerText = currentUser.username;
-        userTypeLbl.innerText = currentUser.user_type === 'first_time' ? 'First-Time Applicant' : currentUser.user_type;
-        
-        // Show first time tips if user is first-time applicant
+
+        if (userWidget) {
+            userWidget.style.display = 'flex';
+            if (userAvatar) userAvatar.innerText = currentUser.username.substring(0, 2).toUpperCase();
+            if (usernameLbl) usernameLbl.innerText = currentUser.username;
+            if (userTypeLbl) userTypeLbl.innerText = currentUser.user_type === 'first_time' ? 'First-Time Applicant' : currentUser.user_type;
+        }
+
         const tipWidget = document.getElementById("first-time-tip-widget");
         if (currentUser.user_type === 'first_time') {
             if (tipWidget) tipWidget.style.display = 'flex';
@@ -80,19 +89,18 @@ function updateUserUI() {
             if (tipWidget) tipWidget.style.display = 'none';
         }
     } else {
-        // Guest user
         if (guestAlert) guestAlert.style.display = 'flex';
         if (navLogin) navLogin.style.display = 'block';
         if (navLogout) navLogout.style.display = 'none';
         if (navHistory) navHistory.style.display = 'none';
         if (navAdmin) navAdmin.style.display = 'none';
-        userWidget.style.display = 'none';
+        if (userWidget) userWidget.style.display = 'none';
         
-        // Hide first time tips for guest
         const tipWidget = document.getElementById("first-time-tip-widget");
         if (tipWidget) tipWidget.style.display = 'none';
     }
 }
+
 // Navigation handling (SPA Tabs)
 function setupNav() {
     const links = document.querySelectorAll(".menu-item a");
@@ -111,17 +119,16 @@ function setupNav() {
         });
     });
 }
+
 function switchTab(tabId) {
-    // Update active class on menu items
     const menuItems = document.querySelectorAll(".menu-item");
     menuItems.forEach(item => item.classList.remove("active"));
     
-    // Find matching link
     const activeLink = document.querySelector(`.menu-item a[href="#${tabId}"]`);
     if (activeLink) {
         activeLink.parentElement.classList.add("active");
     }
-    // Toggle tab visibility
+
     const tabs = document.querySelectorAll(".tab-container");
     tabs.forEach(tab => {
         tab.classList.remove("active");
@@ -129,27 +136,31 @@ function switchTab(tabId) {
             tab.classList.add("active");
         }
     });
-    // Sub-loadings
+
     if (tabId === 'history' && currentUser) {
         loadHistory();
     }
+    if (tabId === 'cibil-sim') {
+        calculateCibilSimulation();
+    }
 }
+
 // Handle client-side language switching
 function changeLanguage(lang) {
     currentLang = lang;
     localStorage.setItem("smartloan_lang", lang);
     applyTranslations();
     
-    // Re-render cached offers in new language
     if (cachedOffers.length > 0) {
         renderOffers(cachedOffers);
     }
+    calculateCibilSimulation();
 }
+
 // Look through elements and update texts
 function applyTranslations() {
     const dict = translations[currentLang] || translations['en'];
     
-    // Translate standard text keys
     const elements = document.querySelectorAll("[data-i18n]");
     elements.forEach(el => {
         const key = el.getAttribute("data-i18n");
@@ -157,7 +168,7 @@ function applyTranslations() {
             el.innerText = dict[key];
         }
     });
-    // Translate input placeholders
+
     const placeholders = document.querySelectorAll("[data-i18n-placeholder]");
     placeholders.forEach(el => {
         const key = el.getAttribute("data-i18n-placeholder");
@@ -166,6 +177,7 @@ function applyTranslations() {
         }
     });
 }
+
 // Form submissions and handlers
 function setupForms() {
     // 1. Eligibility Form Submission
@@ -181,12 +193,13 @@ function setupForms() {
             const tenure = parseInt(document.getElementById("form-tenure").value);
             const loanType = document.getElementById("form-loan-type").value;
             const employment = document.getElementById("form-employment").value;
+            const engineMode = document.getElementById("form-engine-mode") ? document.getElementById("form-engine-mode").value : 'ensemble';
             
             if (!income || !creditScore || !amount || !tenure) {
                 alert("Please fill all required fields with non-zero values.");
                 return;
             }
-            // Post to search API
+
             const requestData = {
                 income: income,
                 existing_emis: emis,
@@ -194,8 +207,10 @@ function setupForms() {
                 loan_amount: amount,
                 tenure_years: tenure,
                 loan_type: loanType,
-                employment_type: employment
+                employment_type: employment,
+                engine_mode: engineMode
             };
+
             fetch('/api/loans/search', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -210,11 +225,22 @@ function setupForms() {
                     selectedCompareIds = [];
                     updateCompareTray();
                     
+                    // Update active engine badge
+                    const badgeLabel = document.getElementById("engine-badge-label");
+                    if (badgeLabel) {
+                        badgeLabel.innerText = engineMode === 'rule' ? 'Phase 1: Rule Engine' : 
+                                               engineMode === 'ml' ? 'Phase 2: ML Random Forest' : 'AI Ensemble (Rule + ML)';
+                    }
+
                     // Render recommendation dashboard
                     renderOffers(data.offers);
+
                     // Render document checklist based on type
                     setupDocumentChecklist(loanType, employment);
-                    
+
+                    // Update quick CIBIL card in Tab 2
+                    updateQuickCibilCard(creditScore);
+
                     // Smooth scroll to results
                     document.getElementById("results-section").scrollIntoView({ behavior: 'smooth' });
                 }
@@ -225,6 +251,7 @@ function setupForms() {
             });
         });
     }
+
     // 2. Login Form Submission
     const loginForm = document.getElementById("login-form-el");
     if (loginForm) {
@@ -251,6 +278,7 @@ function setupForms() {
             .catch(err => console.error("Login failed:", err));
         });
     }
+
     // 3. Registration Form Submission
     const registerForm = document.getElementById("register-form-el");
     if (registerForm) {
@@ -277,13 +305,13 @@ function setupForms() {
                     alert(data.error);
                 } else {
                     alert(data.message);
-                    // Switch to login tab in auth view
                     toggleAuthTab('login');
                 }
             })
             .catch(err => console.error("Registration failed:", err));
         });
     }
+
     // 4. Admin Add Lender Form Submission
     const adminForm = document.getElementById("admin-add-lender-form");
     if (adminForm) {
@@ -305,6 +333,7 @@ function setupForms() {
                 max_tenure_years: parseInt(document.getElementById("adm-tenure-max").value),
                 required_docs: document.getElementById("adm-docs").value
             };
+
             fetch('/api/admin/lenders', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -325,6 +354,7 @@ function setupForms() {
         });
     }
 }
+
 // Log out user
 function logoutUser() {
     fetch('/api/auth/logout', { method: 'POST' })
@@ -335,12 +365,14 @@ function logoutUser() {
             switchTab('dashboard');
         });
 }
-// Auth Tabs Toggle (Login vs Register)
+
+// Auth Tabs Toggle
 function toggleAuthTab(mode) {
     const loginTab = document.getElementById("auth-tab-login-btn");
     const regTab = document.getElementById("auth-tab-reg-btn");
     const loginBox = document.getElementById("login-form-box");
     const regBox = document.getElementById("register-form-box");
+
     if (mode === 'login') {
         loginTab.classList.add("active");
         regTab.classList.remove("active");
@@ -353,7 +385,8 @@ function toggleAuthTab(mode) {
         regBox.style.display = 'block';
     }
 }
-// Interactive Calculator Calculation Logic
+
+// Calculator Sliders Logic
 function setupCalculatorSliders() {
     const sliders = ['calc-principal-range', 'calc-rate-range', 'calc-tenure-range'];
     sliders.forEach(id => {
@@ -364,15 +397,21 @@ function setupCalculatorSliders() {
     });
     runCalculator();
 }
+
 function runCalculator() {
     const p = parseFloat(document.getElementById("calc-principal-range").value);
     const rVal = parseFloat(document.getElementById("calc-rate-range").value);
     const nYears = parseInt(document.getElementById("calc-tenure-range").value);
-    // Update value displays
+
     document.getElementById("calc-principal-val").innerText = "₹" + p.toLocaleString('en-IN');
     document.getElementById("calc-rate-val").innerText = rVal + "%";
     document.getElementById("calc-tenure-val").innerText = nYears + " Years";
-    // Perform math
+
+    const optContext = document.getElementById("opt-context");
+    if (optContext) {
+        optContext.value = `₹${p.toLocaleString('en-IN')} @ ${rVal}% p.a.`;
+    }
+
     const r = (rVal / 12) / 100;
     const n = nYears * 12;
     let emi = 0;
@@ -381,33 +420,66 @@ function runCalculator() {
     } else {
         emi = p * r * (Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
     }
+
     const totalPayable = emi * n;
     const totalInterest = totalPayable - p;
-    // Display
+
     document.getElementById("calc-emi-result").innerText = "₹" + Math.round(emi).toLocaleString('en-IN');
     document.getElementById("calc-principal-result").innerText = "₹" + p.toLocaleString('en-IN');
     document.getElementById("calc-interest-result").innerText = "₹" + Math.round(totalInterest).toLocaleString('en-IN');
     document.getElementById("calc-total-result").innerText = "₹" + Math.round(totalPayable).toLocaleString('en-IN');
 }
+
+// Smart EMI Optimizer
+window.runEmiOptimization = function() {
+    const p = parseFloat(document.getElementById("calc-principal-range").value);
+    const rVal = parseFloat(document.getElementById("calc-rate-range").value);
+    const targetBudget = parseFloat(document.getElementById("opt-budget").value) || 12000;
+
+    fetch('/api/emi/optimize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            loan_amount: p,
+            interest_rate: rVal,
+            target_budget: targetBudget
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        const resultsBox = document.getElementById("emi-opt-results");
+        resultsBox.style.display = 'block';
+
+        document.getElementById("opt-rec-tenure").innerText = `${data.recommended_tenure_years} Years`;
+        document.getElementById("opt-rec-emi").innerText = `₹${Math.round(data.recommended_monthly_emi).toLocaleString('en-IN')}`;
+        document.getElementById("opt-rec-savings").innerText = `₹${Math.round(data.interest_saved_vs_longer_tenure).toLocaleString('en-IN')}`;
+        
+        document.getElementById("opt-rec-advice").innerText = 
+            `💡 By paying ₹${Math.round(data.recommended_monthly_emi).toLocaleString('en-IN')} over ${data.recommended_tenure_years} years, you remain within your ₹${targetBudget.toLocaleString('en-IN')} monthly budget while saving ₹${Math.round(data.interest_saved_vs_longer_tenure).toLocaleString('en-IN')} in total interest!`;
+    })
+    .catch(err => console.error("EMI optimization failed:", err));
+};
+
 // Render Recommendation Offers
 function renderOffers(offers) {
     const tableBody = document.getElementById("offers-table-body");
     tableBody.innerHTML = "";
+
     if (offers.length === 0) {
         tableBody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 2rem; color: var(--text-muted);">No loan products found for this type. Please contact support.</td></tr>`;
         return;
     }
+
     offers.forEach(offer => {
         const tr = document.createElement("tr");
         if (!offer.is_eligible) {
             tr.style.opacity = "0.55";
         }
-        // Circular progress SVG for probability
+
         let circleClass = 'green';
         if (offer.approval_probability < 50) circleClass = 'red';
         else if (offer.approval_probability < 80) circleClass = 'yellow';
         
-        // 2 * pi * r = 2 * 3.14159 * 18 = 113.1
         const strokeOffset = 113.1 - (offer.approval_probability / 100) * 113.1;
         
         let actionCol = '';
@@ -426,13 +498,35 @@ function renderOffers(offers) {
                 <button class="btn btn-outline btn-sm" style="margin-left: 0.5rem;" onclick="showLoanDetails(${offer.lender_id})">?</button>
             `;
         }
+
+        // Dual Engine Score breakdown row
+        const dualScoreHTML = (offer.rule_probability !== undefined && offer.ml_probability !== undefined) ? `
+            <div class="dual-engine-row">
+                <span class="engine-tag" title="Phase 1 Rule Probability">Rule: ${offer.rule_probability}%</span>
+                <span class="engine-tag" title="Phase 2 ML Random Forest Probability">ML: ${offer.ml_probability}%</span>
+            </div>
+        ` : '';
+
+        // Factor badges
+        const prepayBadge = offer.prepayment_penalty_pct === 0 ? 
+            `<span class="factor-badge" style="background: rgba(16,185,129,0.1); color:#34d399; border-color: rgba(16,185,129,0.25);">0% Prepayment Penalty</span>` :
+            `<span class="factor-badge">${offer.prepayment_penalty_pct}% Prepayment</span>`;
+
+        const feeBadge = offer.processing_fee === 0 ?
+            `<span class="factor-badge" style="background: rgba(16,185,129,0.1); color:#34d399; border-color: rgba(16,185,129,0.25);">Zero Processing Fee</span>` :
+            `<span class="factor-badge">Fee: ₹${Math.round(offer.processing_fee).toLocaleString('en-IN')}</span>`;
+
         tr.innerHTML = `
             <td>
-                <div style="font-weight: 700; color: #fff;">${offer.lender_name}</div>
-                <div style="font-size: 0.8rem; color: var(--text-secondary);">${offer.loan_name}</div>
+                <div style="font-weight: 700; color: #fff; font-size: 1rem;">${offer.lender_name}</div>
+                <div style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.35rem;">${offer.loan_name}</div>
+                <div class="factor-tags-grid">
+                    ${prepayBadge}
+                    ${feeBadge}
+                </div>
             </td>
-            <td style="font-family: var(--font-heading); font-weight: 600; color: var(--secondary);">${offer.interest_rate}%</td>
-            <td style="font-weight: 600;">₹${Math.round(offer.monthly_emi).toLocaleString('en-IN')}</td>
+            <td style="font-family: var(--font-heading); font-weight: 600; color: var(--secondary); font-size: 1.05rem;">${offer.interest_rate}%</td>
+            <td style="font-weight: 700; font-size: 1rem;">₹${Math.round(offer.monthly_emi).toLocaleString('en-IN')}</td>
             <td>
                 <div class="prob-container">
                     <div class="circle-progress">
@@ -443,21 +537,25 @@ function renderOffers(offers) {
                         </svg>
                         <div class="prob-val-lbl">${offer.approval_probability}%</div>
                     </div>
+                    ${dualScoreHTML}
                 </div>
             </td>
-            <td style="font-family: var(--font-heading); font-weight: 700;">₹${Math.round(offer.total_cost).toLocaleString('en-IN')}</td>
+            <td>
+                <div style="font-family: var(--font-heading); font-weight: 700; font-size: 1rem;">₹${Math.round(offer.total_cost).toLocaleString('en-IN')}</div>
+                <div style="font-size: 0.75rem; color: var(--text-muted);">Net: ₹${Math.round(offer.net_disbursement).toLocaleString('en-IN')}</div>
+            </td>
             <td>${actionCol}</td>
         `;
         tableBody.appendChild(tr);
     });
 }
-// Show Specific Loan Details Modal
+
+// Show Loan Details Modal
 window.showLoanDetails = function(lenderId) {
     const offer = cachedOffers.find(o => o.lender_id === lenderId);
     if (!offer) return;
     const modal = document.getElementById("details-modal");
     
-    // Fill details
     document.getElementById("modal-lender-title").innerText = offer.lender_name;
     document.getElementById("modal-product-title").innerText = offer.loan_name;
     
@@ -465,11 +563,17 @@ window.showLoanDetails = function(lenderId) {
     document.getElementById("det-interest-val").innerText = "₹" + Math.round(offer.total_interest).toLocaleString('en-IN');
     document.getElementById("det-fee-val").innerText = "₹" + Math.round(offer.processing_fee).toLocaleString('en-IN');
     document.getElementById("det-insurance-val").innerText = "₹" + Math.round(offer.insurance_cost).toLocaleString('en-IN');
+    
+    const netVal = document.getElementById("det-net-val");
+    if (netVal) {
+        netVal.innerText = "₹" + Math.round(offer.net_disbursement).toLocaleString('en-IN');
+    }
+
     document.getElementById("det-total-val").innerText = "₹" + Math.round(offer.total_cost).toLocaleString('en-IN');
-    document.getElementById("det-prepayment-val").innerText = offer.prepayment_penalty_pct > 0 ? `${offer.prepayment_penalty_pct}% penalty` : "0% (Nil)";
+    document.getElementById("det-prepayment-val").innerText = offer.prepayment_penalty_pct > 0 ? `${offer.prepayment_penalty_pct}% penalty` : "0% (Nil - Full Early Repayment Freedom)";
     
     document.getElementById("det-advice-val").innerText = offer.advice_commentary;
-    // Load docs requirements
+
     const docsContainer = document.getElementById("det-docs-list");
     docsContainer.innerHTML = "";
     offer.required_docs.forEach(doc => {
@@ -480,7 +584,7 @@ window.showLoanDetails = function(lenderId) {
         li.innerText = "📄 " + doc;
         docsContainer.appendChild(li);
     });
-    // If there are rejection reasons, display them
+
     const reasonContainer = document.getElementById("det-rejection-reasons");
     if (offer.rejection_reasons && offer.rejection_reasons.length > 0) {
         reasonContainer.style.display = "block";
@@ -496,13 +600,16 @@ window.showLoanDetails = function(lenderId) {
     } else {
         reasonContainer.style.display = "none";
     }
+
     modal.classList.add("active");
     applyTranslations();
 };
+
 window.closeModal = function() {
     document.getElementById("details-modal").classList.remove("active");
     document.getElementById("compare-modal").classList.remove("active");
 };
+
 // Side-by-Side Comparison Logic
 window.toggleCompare = function(lenderId) {
     const idx = selectedCompareIds.indexOf(lenderId);
@@ -523,6 +630,7 @@ window.toggleCompare = function(lenderId) {
     }
     updateCompareTray();
 };
+
 function updateCompareTray() {
     const tray = document.getElementById("compare-tray");
     const container = document.getElementById("compare-bubbles");
@@ -544,7 +652,7 @@ function updateCompareTray() {
     } else {
         tray.classList.remove("active");
     }
-    // Disable comparison button if less than 2 selections
+
     const compBtn = document.getElementById("compare-action-btn");
     if (selectedCompareIds.length >= 2) {
         compBtn.disabled = false;
@@ -554,6 +662,7 @@ function updateCompareTray() {
         compBtn.style.opacity = "0.5";
     }
 }
+
 window.removeCompareBubble = function(lenderId) {
     const cb = document.getElementById(`comp-check-${lenderId}`);
     if (cb) cb.checked = false;
@@ -564,15 +673,15 @@ window.removeCompareBubble = function(lenderId) {
     }
     updateCompareTray();
 };
+
 window.triggerCompareResults = function() {
     if (selectedCompareIds.length < 2) return;
     const modal = document.getElementById("compare-modal");
     const grid = document.getElementById("compare-grid-container");
     grid.innerHTML = "";
-    // Find offers
+
     const selectOffers = cachedOffers.filter(o => selectedCompareIds.includes(o.lender_id));
     
-    // Find winner (lowest total cost)
     let winnerId = -1;
     let minCost = Infinity;
     selectOffers.forEach(o => {
@@ -581,6 +690,7 @@ window.triggerCompareResults = function() {
             winnerId = o.lender_id;
         }
     });
+
     selectOffers.forEach(offer => {
         const isWinner = offer.lender_id === winnerId;
         const card = document.createElement("div");
@@ -590,6 +700,7 @@ window.triggerCompareResults = function() {
             <div class="compare-card-title">
                 <h4>${offer.lender_name}</h4>
                 <p style="font-size: 0.75rem; color: var(--secondary);">${offer.loan_name}</p>
+                ${isWinner ? '<span class="badge badge-success" style="margin-top:0.35rem;">Lowest Lifetime Cost</span>' : ''}
             </div>
             <div class="compare-metric prob-highlight">
                 <span>Approval Probability</span>
@@ -617,21 +728,25 @@ window.triggerCompareResults = function() {
                 <span>Insurance Premium</span>
                 <span>₹${Math.round(offer.insurance_cost).toLocaleString('en-IN')}</span>
             </div>
-            <div class="compare-metric" style="border-bottom: none; font-weight: 800; font-size: 1.1rem; color: #fff; margin-top: 1rem;">
-                <span>Total Cost</span>
-                <span>₹${Math.round(offer.total_cost).toLocaleString('en-IN')}</span>
+            <div class="compare-metric">
+                <span>Prepayment Penalty</span>
+                <span>${offer.prepayment_penalty_pct}%</span>
+            </div>
+            <div class="compare-metric" style="border-bottom: none; font-weight: 800; font-size: 1.15rem; color: #fff; margin-top: 1rem;">
+                <span>Total Borrowing Cost</span>
+                <span style="color: var(--accent-green);">₹${Math.round(offer.total_cost).toLocaleString('en-IN')}</span>
             </div>
         `;
         grid.appendChild(card);
     });
     modal.classList.add("active");
 };
+
 // Document Assistant Checkbox / Guidance Logic
 function setupDocumentChecklist(loanType, employment) {
     const listContainer = document.getElementById("document-checklist-items");
     listContainer.innerHTML = "";
     
-    // Setup guidance dictionary mapping docs to guide elements
     const guidances = {
         'PAN Card': 'doc_guide_pan',
         'Aadhaar Card': 'doc_guide_aadhaar',
@@ -646,9 +761,9 @@ function setupDocumentChecklist(loanType, employment) {
         'Fee Structure document': 'doc_guide_admission',
         'Property Sale Agreement': 'doc_guide_property',
         'Property Title Deeds': 'doc_guide_property',
-        'Property Title Deed': 'doc_guide_property'
+        'Co-borrower Income Proof': 'doc_guide_salary'
     };
-    // Construct required docs list based on loan type and employment
+
     let reqDocs = ['PAN Card', 'Aadhaar Card'];
     if (loanType === 'Personal' || loanType === 'Home') {
         if (employment === 'Salaried') {
@@ -664,9 +779,10 @@ function setupDocumentChecklist(loanType, employment) {
         reqDocs.push('Admission Letter', 'Fee Structure document', 'Co-borrower Income Proof');
     }
     if (loanType === 'Business') {
-        reqDocs.push('ITR (2 years)', 'Business Registration Certificate', 'Bank Statement (12 months)');
+        reqDocs.push('ITR (2 years)', 'Bank Statement (12 months)');
     }
-    reqDocs = [...new Set(reqDocs)]; // deduplicate
+
+    reqDocs = [...new Set(reqDocs)];
     reqDocs.forEach((doc, idx) => {
         const item = document.createElement("div");
         item.className = "doc-check-item";
@@ -675,10 +791,11 @@ function setupDocumentChecklist(loanType, employment) {
         item.innerHTML = `
             <input type="checkbox" class="custom-checkbox" id="doc-cb-${idx}">
             <span style="font-weight: 500;">${doc}</span>
+            <span style="margin-left: auto; font-size: 0.72rem; color: #38bdf8; background: rgba(6,182,212,0.1); padding: 0.1rem 0.4rem; border-radius: 4px;">DigiLocker</span>
         `;
         listContainer.appendChild(item);
     });
-    // Compile guidance references
+
     const guideContainer = document.getElementById("document-checklist-guidance");
     guideContainer.innerHTML = "";
     reqDocs.forEach(doc => {
@@ -691,8 +808,10 @@ function setupDocumentChecklist(loanType, employment) {
             guideContainer.appendChild(li);
         }
     });
+
     document.getElementById("document-assistant-card").style.display = "block";
 }
+
 function toggleDocChecked(idx) {
     const cb = document.getElementById(`doc-cb-${idx}`);
     const item = document.getElementById(`doc-item-${idx}`);
@@ -704,7 +823,162 @@ function toggleDocChecked(idx) {
         item.classList.remove("checked");
     }
 }
-// Load Loan History for registered user
+
+// Document Readiness Check
+window.runDocumentReadinessCheck = function() {
+    const total = document.querySelectorAll(".doc-check-item").length;
+    const checked = document.querySelectorAll(".doc-check-item.checked").length;
+    const banner = document.getElementById("doc-readiness-banner");
+    banner.style.display = 'block';
+
+    if (total === 0) return;
+
+    if (checked === total) {
+        banner.className = 'readiness-banner readiness-success';
+        banner.innerText = '✔ 100% Document Readiness. DigiLocker verified documents expedite bank approval by 48 hours!';
+    } else {
+        banner.className = 'readiness-banner readiness-warning';
+        banner.innerText = `⚠️ You have ${checked} of ${total} documents verified. Ensure missing items are obtained via DigiLocker or NetBanking to prevent bank rejection.`;
+    }
+};
+
+// CIBIL Simulator Setup & Calculations
+function setupCibilSimulator() {
+    const simInput = document.getElementById("sim-cibil-input");
+    if (simInput) {
+        simInput.addEventListener("input", calculateCibilSimulation);
+    }
+    calculateCibilSimulation();
+}
+
+window.calculateCibilSimulation = function() {
+    const simInput = document.getElementById("sim-cibil-input");
+    if (!simInput) return;
+    const curScore = parseInt(simInput.value) || 670;
+
+    const actions = [];
+    if (document.getElementById("chk-util")?.checked) actions.push('reduce_utilization');
+    if (document.getElementById("chk-overdue")?.checked) actions.push('clear_overdue');
+    if (document.getElementById("chk-autodebit")?.checked) actions.push('auto_debit');
+    if (document.getElementById("chk-inquiries")?.checked) actions.push('avoid_inquiries');
+    if (document.getElementById("chk-mix")?.checked) actions.push('credit_mix');
+
+    fetch('/api/cibil/optimize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ current_score: curScore, actions: actions })
+    })
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById("sim-score-before").innerText = data.current_score;
+        document.getElementById("sim-score-after").innerText = data.projected_score;
+        document.getElementById("sim-points-badge").innerText = `+${data.points_gain} Points Potential`;
+        document.getElementById("sim-odds-before").innerText = `${data.current_approval_odds}%`;
+        document.getElementById("sim-odds-after").innerText = `${data.projected_approval_odds}%`;
+        document.getElementById("sim-rate-benefit").innerText = data.estimated_rate_discount;
+    })
+    .catch(err => console.error("CIBIL simulation error:", err));
+};
+
+window.applySimulatedScoreToForm = function() {
+    const projScore = parseInt(document.getElementById("sim-score-after").innerText) || 750;
+    const creditInput = document.getElementById("form-credit");
+    if (creditInput) {
+        creditInput.value = projScore;
+    }
+    switchTab('apply');
+    alert(`Projected CIBIL Score of ${projScore} applied to Eligibility Application!`);
+};
+
+function updateQuickCibilCard(score) {
+    const card = document.getElementById("quick-cibil-card");
+    if (!card) return;
+    card.style.display = 'block';
+
+    const currentElem = document.getElementById("quick-cibil-current");
+    const projElem = document.getElementById("quick-cibil-proj");
+    const barElem = document.getElementById("quick-cibil-bar");
+    
+    currentElem.innerText = score;
+    const projected = Math.min(900, score + 65);
+    projElem.innerText = projected;
+
+    const pct = Math.round(((projected - 300) / 600) * 100);
+    barElem.style.width = `${pct}%`;
+}
+
+// AI Financial Coach Interactive Chat
+window.toggleCoachWindow = function() {
+    const win = document.getElementById("coach-window");
+    if (win.style.display === 'none' || win.style.display === '') {
+        win.style.display = 'flex';
+        document.getElementById("coach-input-text").focus();
+    } else {
+        win.style.display = 'none';
+    }
+};
+
+window.sendQuickCoachMessage = function(topic) {
+    const input = document.getElementById("coach-input-text");
+    const prompts = {
+        'cibil': 'How can I increase my CIBIL score quickly?',
+        'dti': 'What is Debt-to-Income (DTI) ratio and how do banks calculate it?',
+        'fees': 'What are the hidden fees and charges in a loan?',
+        'docs': 'What documents do I need for a Home Loan?'
+    };
+    input.value = prompts[topic] || topic;
+    handleCoachSubmit(new Event('submit'));
+};
+
+window.handleCoachSubmit = function(e) {
+    if (e && e.preventDefault) e.preventDefault();
+    const input = document.getElementById("coach-input-text");
+    const msg = input.value.trim();
+    if (!msg) return;
+
+    const msgArea = document.getElementById("coach-messages-area");
+
+    // Append user message
+    const userBubble = document.createElement("div");
+    userBubble.className = "coach-bubble coach-bubble-user";
+    userBubble.innerText = msg;
+    msgArea.appendChild(userBubble);
+
+    input.value = "";
+    msgArea.scrollTop = msgArea.scrollHeight;
+
+    // Typing indicator
+    const typingBubble = document.createElement("div");
+    typingBubble.className = "coach-bubble coach-bubble-bot";
+    typingBubble.id = "coach-typing";
+    typingBubble.innerHTML = `<em>Advisor is thinking...</em>`;
+    msgArea.appendChild(typingBubble);
+    msgArea.scrollTop = msgArea.scrollHeight;
+
+    fetch('/api/coach/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: msg, language: currentLang })
+    })
+    .then(res => res.json())
+    .then(data => {
+        const tBubble = document.getElementById("coach-typing");
+        if (tBubble) tBubble.remove();
+
+        const botBubble = document.createElement("div");
+        botBubble.className = "coach-bubble coach-bubble-bot";
+        botBubble.innerHTML = data.reply;
+        msgArea.appendChild(botBubble);
+        msgArea.scrollTop = msgArea.scrollHeight;
+    })
+    .catch(err => {
+        const tBubble = document.getElementById("coach-typing");
+        if (tBubble) tBubble.remove();
+        console.error("Coach chat failed:", err);
+    });
+};
+
+// Loan History Loader
 function loadHistory() {
     fetch('/api/applications/history')
         .then(res => res.json())
@@ -723,6 +997,7 @@ function loadHistory() {
                 const date = new Date(item.created_at).toLocaleDateString('en-IN', {
                     day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
                 });
+
                 let offersHTML = '';
                 if (item.saved_offers && item.saved_offers.length > 0) {
                     offersHTML = `
@@ -740,6 +1015,7 @@ function loadHistory() {
                 } else {
                     offersHTML = `<div style="font-size:0.8rem; color:var(--text-muted); margin-top: 0.5rem;">No eligible recommendations found for this query.</div>`;
                 }
+
                 card.innerHTML = `
                     <div style="display:flex; justify-content:space-between; align-items:flex-start;">
                         <div>
@@ -755,7 +1031,8 @@ function loadHistory() {
         })
         .catch(err => console.error("History fetch failed:", err));
 }
-// Load Lender Products list for Admin
+
+// Admin Lender Management
 function loadAdminLenders() {
     fetch('/api/admin/lenders')
         .then(res => res.json())
@@ -790,7 +1067,7 @@ function loadAdminLenders() {
         })
         .catch(err => console.error("Admin load lenders failed:", err));
 }
-// Load Admin Summary Analytics
+
 function loadAdminAnalytics() {
     fetch('/api/admin/analytics')
         .then(res => res.json())
@@ -803,6 +1080,7 @@ function loadAdminAnalytics() {
         })
         .catch(err => console.error("Admin load stats failed:", err));
 }
+
 window.deleteLenderProduct = function(id) {
     if (!confirm("Are you sure you want to delete this loan product?")) return;
     fetch(`/api/admin/lenders/${id}`, { method: 'DELETE' })
@@ -814,8 +1092,8 @@ window.deleteLenderProduct = function(id) {
         })
         .catch(err => console.error("Delete failed:", err));
 };
+
 window.editLenderProduct = function(id) {
-    // Basic prompts for rapid editing
     fetch('/api/admin/lenders')
         .then(res => res.json())
         .then(data => {
@@ -839,6 +1117,7 @@ window.editLenderProduct = function(id) {
             });
         });
 };
+
 function loadAdminUsers() {
     fetch('/api/admin/users')
         .then(res => res.json())
@@ -870,6 +1149,7 @@ function loadAdminUsers() {
         })
         .catch(err => console.error("Admin load users failed:", err));
 }
+
 window.deleteUserAccount = function(id) {
     if (!confirm("Are you sure you want to delete this user profile?")) return;
     fetch(`/api/admin/users/${id}`, { method: 'DELETE' })
@@ -881,6 +1161,7 @@ window.deleteUserAccount = function(id) {
         })
         .catch(err => console.error("Delete user failed:", err));
 };
+
 window.editUserLevel = function(id, currentType) {
     const newType = prompt("Enter new user level (guest, registered, first_time, admin):", currentType);
     if (!newType) return;
@@ -893,7 +1174,7 @@ window.editUserLevel = function(id, currentType) {
     .then(data => {
         alert(data.message || data.error);
         loadAdminUsers();
-        checkAuth(); // update current user widget if they changed themselves
+        checkAuth();
     })
     .catch(err => console.error("Edit user level failed:", err));
 };

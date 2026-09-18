@@ -5,11 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SmartLoan AI - AI-Powered Loan Advisory Platform</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <!-- Modern Google Font: Inter / Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="app-container">
         
-        <!-- Sidebar -->
+        <!-- Sidebar Navigation -->
         <aside class="sidebar">
             <div class="brand-section">
                 <div class="brand-icon">
@@ -22,6 +26,7 @@
                     <p data-i18n="tagline">AI Advisory Platform</p>
                 </div>
             </div>
+
             <nav style="flex-grow: 1;">
                 <ul class="menu-list">
                     <li class="menu-item active" id="nav-dashboard-item">
@@ -40,6 +45,12 @@
                         <a href="#calculator">
                             <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-4 6h-2v2h2V9zm-4 0H9v2h2V9zm-2 4h2v2H7v-2zm4 0h2v2h-2v-2zm4 0h2v2h-2v-2zm-8 4h10v2H7v-2z"/></svg>
                             <span data-i18n="nav_calculator">EMI Calculator</span>
+                        </a>
+                    </li>
+                    <li class="menu-item" id="nav-cibil-item">
+                        <a href="#cibil-sim">
+                            <svg viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>
+                            <span data-i18n="cibil_sim_title">CIBIL Simulator</span>
                         </a>
                     </li>
                     <li class="menu-item" id="nav-history-item" style="display: none;">
@@ -68,7 +79,8 @@
                     </li>
                 </ul>
             </nav>
-            <!-- Sidebar User profile component -->
+
+            <!-- Sidebar User Profile Widget -->
             <div class="user-widget" id="sidebar-user-widget" style="display: none;">
                 <div class="user-info">
                     <div class="user-avatar" id="widget-avatar">U</div>
@@ -79,7 +91,8 @@
                 </div>
             </div>
         </aside>
-        <!-- Main Content Viewport -->
+
+        <!-- Main Viewport -->
         <main class="main-content">
             
             <!-- Top Controls Header -->
@@ -89,6 +102,9 @@
                     <p data-i18n="tagline" style="color: var(--secondary);">AI-Powered Loan Advisory Platform</p>
                 </div>
                 <div class="header-controls">
+                    <button class="coach-top-btn" onclick="toggleCoachWindow()" title="Chat with AI Coach">
+                        <span>💬</span> <span data-i18n="coach_launcher">Ask AI Coach</span>
+                    </button>
                     <select id="lang-select" class="lang-selector" onchange="changeLanguage(this.value)">
                         <option value="en">English (EN)</option>
                         <option value="hi">हिंदी (HI)</option>
@@ -98,6 +114,7 @@
                     </select>
                 </div>
             </div>
+
             <!-- Guest Alert Message -->
             <div class="guest-alert" id="guest-alert">
                 <div class="guest-alert-text">
@@ -105,6 +122,7 @@
                 </div>
                 <button class="btn btn-secondary btn-sm" onclick="switchTab('auth')" data-i18n="nav_login">Login / Sign Up</button>
             </div>
+
             <!-- First-Time Applicant Tip Widget -->
             <div class="tip-widget" id="first-time-tip-widget" style="display: none;">
                 <div style="font-size: 1.5rem;">💡</div>
@@ -112,69 +130,81 @@
                     <span data-i18n="msg_first_time_tip">First-Time Applicant Tip: Try to choose loans with a lower 'Total Cost' rather than just focusing on a low interest rate. Lower processing fees and zero prepayment penalties save money in the long run!</span>
                 </div>
             </div>
+
             <!-- TAB 1: DASHBOARD -->
             <div id="dashboard" class="tab-container active">
-                <div class="glass-card" style="background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(6, 182, 212, 0.1) 100%);">
-                    <h2 style="font-size: 2.25rem; margin-bottom: 1rem; color: #fff;">Smart Loan Matcher Engine</h2>
-                    <p style="font-size: 1.1rem; margin-bottom: 2rem; max-width: 800px;">
-                        Evaluate approval odds, calculate exact EMI options, identify hidden processing and insurance fees, and receive custom guidelines for top lending partners in India.
-                    </p>
-                    <div style="display: flex; gap: 1rem;">
-                        <button class="btn btn-primary" onclick="switchTab('apply')" data-i18n="nav_apply">Check Eligibility</button>
-                        <button class="btn btn-outline" onclick="switchTab('calculator')" data-i18n="nav_calculator">EMI Calculator</button>
+                <div class="glass-card hero-card">
+                    <div class="hero-content">
+                        <span class="hero-badge">Next-Gen Fintech AI</span>
+                        <h2 style="font-size: 2.3rem; margin-bottom: 0.75rem; color: #fff; font-weight: 700;">Smart Loan Matcher & Underwriting Engine</h2>
+                        <p style="font-size: 1.05rem; margin-bottom: 1.75rem; max-width: 820px; line-height: 1.6; color: var(--text-secondary);">
+                            Evaluate approval odds, calculate exact EMI options, uncover hidden processing and insurance fees, and receive custom guidelines for top lending institutions in India—all powered by Rule-based Expert Policies & Scikit-Learn Machine Learning.
+                        </p>
+                        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                            <button class="btn btn-primary" onclick="switchTab('apply')" data-i18n="nav_apply">Check Eligibility</button>
+                            <button class="btn btn-outline" onclick="switchTab('calculator')" data-i18n="nav_calculator">EMI Calculator</button>
+                            <button class="btn btn-secondary" onclick="switchTab('cibil-sim')" data-i18n="cibil_sim_title">CIBIL Simulator</button>
+                        </div>
                     </div>
                 </div>
-                <div class="grid-3">
+
+                <div class="grid-4" style="margin-top: 1.5rem;">
                     <div class="glass-card interactive" onclick="switchTab('apply')">
-                        <div style="font-size: 2rem; margin-bottom: 1rem;">⚡</div>
-                        <h3 style="margin-bottom: 0.5rem;" data-i18n="nav_apply">Check Eligibility</h3>
-                        <p style="font-size: 0.9rem;">Fill a single questionnaire to evaluate pre-approvals across multiple institutions.</p>
+                        <div class="feature-icon-box" style="background: rgba(139, 92, 246, 0.15); color: #c084fc;">⚡</div>
+                        <h3 style="margin-bottom: 0.5rem; font-size: 1.15rem;" data-i18n="nav_apply">Check Eligibility</h3>
+                        <p style="font-size: 0.88rem; color: var(--text-secondary);">One application form to compare pre-approvals across multiple Indian banks simultaneously.</p>
                     </div>
                     <div class="glass-card interactive" onclick="switchTab('calculator')">
-                        <div style="font-size: 2rem; margin-bottom: 1rem;">📊</div>
-                        <h3 style="margin-bottom: 0.5rem;" data-i18n="nav_calculator">EMI Calculator</h3>
-                        <p style="font-size: 0.9rem;">Interact with variables to optimize total repayment and interest expense.</p>
+                        <div class="feature-icon-box" style="background: rgba(6, 182, 212, 0.15); color: #22d3ee;">📊</div>
+                        <h3 style="margin-bottom: 0.5rem; font-size: 1.15rem;" data-i18n="nav_calculator">EMI Calculator</h3>
+                        <p style="font-size: 0.88rem; color: var(--text-secondary);">Interactive sliders and Smart Tenure Optimizer to minimize total interest paid.</p>
                     </div>
-                    <div class="glass-card interactive" id="dashboard-docs-card" onclick="switchTab('apply')">
-                        <div style="font-size: 2rem; margin-bottom: 1rem;">📋</div>
-                        <h3 style="margin-bottom: 0.5rem;" data-i18n="nav_docs">Document Help</h3>
-                        <p style="font-size: 0.9rem;">Identify missing elements based on application profiles, and get advice on how to fetch them.</p>
+                    <div class="glass-card interactive" onclick="switchTab('cibil-sim')">
+                        <div class="feature-icon-box" style="background: rgba(16, 185, 129, 0.15); color: #34d399;">📈</div>
+                        <h3 style="margin-bottom: 0.5rem; font-size: 1.15rem;" data-i18n="cibil_sim_title">CIBIL Simulator</h3>
+                        <p style="font-size: 0.88rem; color: var(--text-secondary);">Actionable steps to simulate score gains and unlock lower interest rate tiers.</p>
+                    </div>
+                    <div class="glass-card interactive" onclick="toggleCoachWindow()">
+                        <div class="feature-icon-box" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24;">🤖</div>
+                        <h3 style="margin-bottom: 0.5rem; font-size: 1.15rem;" data-i18n="coach_title">AI Financial Coach</h3>
+                        <p style="font-size: 0.88rem; color: var(--text-secondary);">Instant conversational advisory available in English, Hindi, Marathi, Gujarati, and Tamil.</p>
                     </div>
                 </div>
                 
                 <!-- Guest Educational Guide -->
                 <div class="glass-card" style="margin-top: 1.5rem;">
                     <h3 style="font-size: 1.5rem; margin-bottom: 0.5rem;" data-i18n="edu_title">Financial Literacy & Educational Guide</h3>
-                    <p style="font-size: 0.9rem; margin-bottom: 2rem;" data-i18n="edu_subtitle">Simplified guidelines to help you make smart borrowing decisions.</p>
+                    <p style="font-size: 0.9rem; margin-bottom: 2rem; color: var(--text-secondary);" data-i18n="edu_subtitle">Simplified guidelines to help you make smart borrowing decisions.</p>
                     
                     <div class="grid-2">
                         <div class="advice-card" style="background: rgba(6, 182, 212, 0.03); border-left-color: var(--secondary);">
-                            <h4 style="font-size: 1.1rem; margin-bottom: 0.5rem; color: #fff;" data-i18n="edu_cibil_title">1. Understanding Credit Score (CIBIL)</h4>
-                            <p style="font-size: 0.85rem;" data-i18n="edu_cibil_desc">Your CIBIL score is a 3-digit number (300-900) summarizing your credit history. Scores above 750 get faster approvals and lower interest rates. Applying to multiple banks at once creates multiple 'hard inquiries' which lowers your score.</p>
+                            <h4 style="font-size: 1.05rem; margin-bottom: 0.5rem; color: #fff;" data-i18n="edu_cibil_title">1. Understanding Credit Score (CIBIL)</h4>
+                            <p style="font-size: 0.85rem; line-height: 1.6; color: var(--text-secondary);" data-i18n="edu_cibil_desc">Your CIBIL score is a 3-digit number (300-900) summarizing your credit history. Scores above 750 get faster approvals and lower interest rates. Applying to multiple banks at once creates multiple 'hard inquiries' which lowers your score.</p>
                         </div>
                         <div class="advice-card" style="background: rgba(6, 182, 212, 0.03); border-left-color: var(--secondary);">
-                            <h4 style="font-size: 1.1rem; margin-bottom: 0.5rem; color: #fff;" data-i18n="edu_dti_title">2. What is Debt-To-Income (DTI)?</h4>
-                            <p style="font-size: 0.85rem;" data-i18n="edu_dti_desc">DTI measures how much of your monthly income goes toward paying debts (including the new EMI). Lenders prefer a DTI below 50%. A high DTI makes banks see you as high-risk.</p>
+                            <h4 style="font-size: 1.05rem; margin-bottom: 0.5rem; color: #fff;" data-i18n="edu_dti_title">2. What is Debt-To-Income (DTI)?</h4>
+                            <p style="font-size: 0.85rem; line-height: 1.6; color: var(--text-secondary);" data-i18n="edu_dti_desc">DTI measures how much of your monthly income goes toward paying debts (including the new EMI). Lenders prefer a DTI below 50%. A high DTI makes banks see you as high-risk.</p>
                         </div>
                         <div class="advice-card" style="background: rgba(6, 182, 212, 0.03); border-left-color: var(--secondary);">
-                            <h4 style="font-size: 1.1rem; margin-bottom: 0.5rem; color: #fff;" data-i18n="edu_costs_title">3. Looking Beyond Interest Rates</h4>
-                            <p style="font-size: 0.85rem;" data-i18n="edu_costs_desc">Processing fees (which can be flat or percentage-based) and insurance premiums are often added to the loan cost. A loan with 9% rate and high fees might cost more than a 9.5% loan with zero fees.</p>
+                            <h4 style="font-size: 1.05rem; margin-bottom: 0.5rem; color: #fff;" data-i18n="edu_costs_title">3. Looking Beyond Interest Rates</h4>
+                            <p style="font-size: 0.85rem; line-height: 1.6; color: var(--text-secondary);" data-i18n="edu_costs_desc">Processing fees (which can be flat or percentage-based) and insurance premiums are often added to the loan cost. A loan with 9% rate and high fees might cost more than a 9.5% loan with zero fees.</p>
                         </div>
                         <div class="advice-card" style="background: rgba(6, 182, 212, 0.03); border-left-color: var(--secondary);">
-                            <h4 style="font-size: 1.1rem; margin-bottom: 0.5rem; color: #fff;" data-i18n="edu_prepay_title">4. Prepayment Penalties</h4>
-                            <p style="font-size: 0.85rem;" data-i18n="edu_prepay_desc">If you get extra funds and want to close your loan early, some banks charge a prepayment penalty (e.g. 2-4% of outstanding principal). Look for loans with 0% prepayment penalty if you plan early closure.</p>
+                            <h4 style="font-size: 1.05rem; margin-bottom: 0.5rem; color: #fff;" data-i18n="edu_prepay_title">4. Prepayment Penalties</h4>
+                            <p style="font-size: 0.85rem; line-height: 1.6; color: var(--text-secondary);" data-i18n="edu_prepay_desc">If you get extra funds and want to close your loan early, some banks charge a prepayment penalty (e.g. 2-4% of outstanding principal). Look for loans with 0% prepayment penalty if you plan early closure.</p>
                         </div>
                     </div>
                 </div>
             </div>
+
             <!-- TAB 2: CHECK ELIGIBILITY / RECOMMENDATIONS -->
             <div id="apply" class="tab-container">
                 <div class="glass-card">
                     <h3 style="font-size: 1.5rem; margin-bottom: 0.5rem;" data-i18n="form_title">Loan Eligibility Application</h3>
-                    <p style="font-size: 0.9rem; margin-bottom: 2rem;" data-i18n="form_subtitle">Enter your financial details to instantly match and compare offers across top lenders.</p>
+                    <p style="font-size: 0.9rem; margin-bottom: 2rem; color: var(--text-secondary);" data-i18n="form_subtitle">Enter your financial details to instantly match and compare offers across top lenders.</p>
                     
                     <form id="eligibility-form">
-                        <div class="grid-3">
+                        <div class="grid-4">
                             <div class="form-group">
                                 <label for="form-loan-type" data-i18n="lbl_loan_type">Select Loan Type</label>
                                 <select id="form-loan-type" class="form-select">
@@ -196,7 +226,16 @@
                                 <label for="form-credit" data-i18n="lbl_credit">CIBIL Credit Score (300 - 900)</label>
                                 <input type="number" id="form-credit" class="form-input" min="300" max="900" value="750" required>
                             </div>
+                            <div class="form-group">
+                                <label for="form-engine-mode" data-i18n="engine_title">AI Decision Engine Mode</label>
+                                <select id="form-engine-mode" class="form-select" style="border-color: var(--primary);">
+                                    <option value="ensemble" data-i18n="opt_engine_ensemble">AI Ensemble (Rule + Machine Learning)</option>
+                                    <option value="rule" data-i18n="opt_engine_rule">Phase 1: Rule Engine (Banking Rules)</option>
+                                    <option value="ml" data-i18n="opt_engine_ml">Phase 2: ML Engine (Random Forest)</option>
+                                </select>
+                            </div>
                         </div>
+
                         <div class="grid-4">
                             <div class="form-group">
                                 <label for="form-income" data-i18n="lbl_income">Monthly Net Income (₹)</label>
@@ -215,15 +254,27 @@
                                 <input type="number" id="form-tenure" class="form-input" min="1" max="30" value="5" required>
                             </div>
                         </div>
-                        <div style="display: flex; justify-content: flex-end; margin-top: 1rem;">
+
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+                            <div style="font-size: 0.85rem; color: var(--text-secondary);">
+                                🔒 Single soft evaluation. Your credit score will not be impacted by hard bank inquiries.
+                            </div>
                             <button type="submit" class="btn btn-primary" data-i18n="btn_submit">Analyze & Recommend</button>
                         </div>
                     </form>
                 </div>
+
                 <!-- Results Output Grid -->
-                <div id="results-section" class="glass-card" style="display: block;">
-                    <h3 style="font-size: 1.5rem; margin-bottom: 0.5rem;" data-i18n="res_title">AI-Generated Loan Recommendations</h3>
-                    <p style="font-size: 0.9rem; margin-bottom: 2.5rem;" data-i18n="res_subtitle">Sorted by your highest approval probability and lowest lifetime cost.</p>
+                <div id="results-section" class="glass-card" style="display: block; margin-top: 1.5rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+                        <div>
+                            <h3 style="font-size: 1.5rem; margin-bottom: 0.25rem;" data-i18n="res_title">AI-Generated Loan Recommendations</h3>
+                            <p style="font-size: 0.88rem; color: var(--text-secondary);" data-i18n="res_subtitle">Sorted by your highest approval probability and lowest lifetime cost.</p>
+                        </div>
+                        <div id="active-engine-badge" class="engine-badge">
+                            Active: <strong id="engine-badge-label">AI Ensemble</strong>
+                        </div>
+                    </div>
                     
                     <div style="overflow-x: auto;">
                         <table class="offers-table">
@@ -239,33 +290,71 @@
                             </thead>
                             <tbody id="offers-table-body">
                                 <tr>
-                                    <td colspan="6" style="text-align: center; padding: 2rem; color: var(--text-muted);">Please fill and submit the eligibility questionnaire to discover offers.</td>
+                                    <td colspan="6" style="text-align: center; padding: 2.5rem; color: var(--text-muted);">
+                                        Please fill and submit the eligibility questionnaire to discover offers.
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
+
                 <!-- Document Checklist Assistant widget -->
-                <div class="grid-2">
+                <div class="grid-2" style="margin-top: 1.5rem;">
                     <div id="document-assistant-card" class="glass-card" style="display: none;">
-                        <h3 style="font-size: 1.5rem; margin-bottom: 0.5rem;" data-i18n="docs_title">Document Assistant & Guidance</h3>
-                        <p style="font-size: 0.9rem; margin-bottom: 2rem;" data-i18n="docs_subtitle">Check your required documents checklist based on your application profiles.</p>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+                            <div>
+                                <h3 style="font-size: 1.35rem; margin-bottom: 0.25rem;" data-i18n="docs_title">Document Assistant & Guidance</h3>
+                                <p style="font-size: 0.85rem; color: var(--text-secondary);" data-i18n="docs_subtitle">Check your required documents checklist based on your application profiles.</p>
+                            </div>
+                            <button class="btn btn-secondary btn-sm" onclick="runDocumentReadinessCheck()" data-i18n="doc_verify_sim">Verify Readiness</button>
+                        </div>
                         
-                        <h4 style="margin-bottom: 1rem; font-size: 1rem;" data-i18n="docs_check">Mark documents you have ready:</h4>
+                        <div id="doc-readiness-banner" class="readiness-banner" style="display: none;"></div>
+
+                        <h4 style="margin-bottom: 0.75rem; font-size: 0.95rem;" data-i18n="docs_check">Mark documents you have ready:</h4>
                         <div class="doc-section">
                             <div class="doc-list-checklist" id="document-checklist-items"></div>
                             
-                            <h4 style="margin-top: 1rem; margin-bottom: 1rem; font-size: 1rem;" data-i18n="docs_missing">Guidance for missing or unavailable documents:</h4>
-                            <div id="document-checklist-guidance" style="display: flex; flex-direction: column; gap: 0.5rem;"></div>
+                            <h4 style="margin-top: 1.25rem; margin-bottom: 0.75rem; font-size: 0.95rem;" data-i18n="docs_missing">Guidance for missing or unavailable documents:</h4>
+                            <div id="document-checklist-guidance" style="display: flex; flex-direction: column; gap: 0.65rem;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Quick CIBIL Improvement Card inside Tab 2 -->
+                    <div id="quick-cibil-card" class="glass-card" style="display: none;">
+                        <h3 style="font-size: 1.35rem; margin-bottom: 0.25rem;" data-i18n="cibil_sim_title">CIBIL Score Optimization</h3>
+                        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.25rem;">Boost your approval chance and lower your borrowing interest rate.</p>
+                        
+                        <div class="cibil-meter-box">
+                            <div class="cibil-display-scores">
+                                <div>
+                                    <span class="label">Current Score</span>
+                                    <h2 id="quick-cibil-current">750</h2>
+                                </div>
+                                <div style="font-size: 1.5rem; color: var(--primary);">➔</div>
+                                <div>
+                                    <span class="label">Projected Score</span>
+                                    <h2 id="quick-cibil-proj" style="color: var(--accent-green);">815</h2>
+                                </div>
+                            </div>
+                            <div class="progress-bar-bg" style="margin: 1rem 0;">
+                                <div id="quick-cibil-bar" class="progress-bar-fill" style="width: 75%;"></div>
+                            </div>
+                            <p id="quick-cibil-rate-tip" style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;">
+                                Improving score above 750 qualifies you for prime lending rates.
+                            </p>
+                            <button class="btn btn-outline btn-sm" onclick="switchTab('cibil-sim')" data-i18n="btn_calc_sim">Open Full CIBIL Simulator</button>
                         </div>
                     </div>
                 </div>
             </div>
-            <!-- TAB 3: EMI CALCULATOR -->
+
+            <!-- TAB 3: EMI CALCULATOR & OPTIMIZER -->
             <div id="calculator" class="tab-container">
                 <div class="glass-card">
                     <h3 style="font-size: 1.5rem; margin-bottom: 0.5rem;" data-i18n="calc_title">Interactive EMI Calculator</h3>
-                    <p style="font-size: 0.9rem; margin-bottom: 2rem;" data-i18n="calc_subtitle">Quickly estimate your monthly repayment. Adjust values to optimize your loan structure.</p>
+                    <p style="font-size: 0.9rem; margin-bottom: 2rem; color: var(--text-secondary);" data-i18n="calc_subtitle">Quickly estimate your monthly repayment. Adjust values to optimize your loan structure.</p>
                     
                     <div class="calc-layout">
                         <div>
@@ -294,6 +383,7 @@
                                 <input type="range" id="calc-tenure-range" class="range-slider" min="1" max="30" step="1" value="5">
                             </div>
                         </div>
+
                         <!-- Results Panel -->
                         <div class="calc-summary-panel">
                             <span data-i18n="calc_emi" style="color: var(--text-secondary); font-size: 0.95rem; font-weight: 500;">Estimated Monthly EMI</span>
@@ -314,16 +404,129 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- EMI Optimizer & Tenure Finder Tool -->
+                <div class="glass-card" style="margin-top: 1.5rem;" id="emi-optimizer-card">
+                    <h3 style="font-size: 1.4rem; margin-bottom: 0.5rem;" data-i18n="emi_opt_title">Smart EMI Optimizer & Interest Saver</h3>
+                    <p style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 1.5rem;" data-i18n="emi_opt_subtitle">Find your optimal repayment tenure based on your monthly budget and save thousands in interest.</p>
+
+                    <div class="grid-3" style="align-items: flex-end;">
+                        <div class="form-group">
+                            <label for="opt-budget" data-i18n="lbl_target_budget">Comfortable Monthly Budget (₹)</label>
+                            <input type="number" id="opt-budget" class="form-input" value="12000" min="1000" step="500">
+                        </div>
+                        <div class="form-group">
+                            <label>Loan Amount & Rate from Calculator</label>
+                            <input type="text" id="opt-context" class="form-input" value="₹5,00,000 @ 9.5% p.a." disabled style="opacity: 0.75;">
+                        </div>
+                        <div class="form-group">
+                            <button type="button" class="btn btn-secondary" style="width: 100%;" onclick="runEmiOptimization()" data-i18n="btn_optimize_emi">Calculate Optimal Plan</button>
+                        </div>
+                    </div>
+
+                    <div id="emi-opt-results" class="emi-opt-results-box" style="display: none; margin-top: 1.5rem;">
+                        <div class="grid-3">
+                            <div class="stat-highlight">
+                                <span>Recommended Tenure</span>
+                                <h3 id="opt-rec-tenure">4 Years</h3>
+                            </div>
+                            <div class="stat-highlight">
+                                <span>Calculated Monthly EMI</span>
+                                <h3 id="opt-rec-emi" style="color: var(--accent-green);">₹12,560</h3>
+                            </div>
+                            <div class="stat-highlight">
+                                <span>Interest Saved vs Longer Tenure</span>
+                                <h3 id="opt-rec-savings" style="color: var(--secondary);">₹42,300</h3>
+                            </div>
+                        </div>
+                        <p id="opt-rec-advice" style="font-size: 0.88rem; margin-top: 1rem; color: var(--text-secondary);"></p>
+                    </div>
+                </div>
             </div>
+
+            <!-- TAB: CIBIL SIMULATOR -->
+            <div id="cibil-sim" class="tab-container">
+                <div class="glass-card">
+                    <h3 style="font-size: 1.5rem; margin-bottom: 0.5rem;" data-i18n="cibil_sim_title">Interactive CIBIL Improvement Planner & Simulator</h3>
+                    <p style="font-size: 0.9rem; margin-bottom: 2rem; color: var(--text-secondary);" data-i18n="cibil_sim_subtitle">Simulate actionable steps to raise your credit score before applying and unlock lower interest rates.</p>
+
+                    <div class="grid-2">
+                        <div>
+                            <div class="form-group">
+                                <label for="sim-cibil-input" data-i18n="cibil_cur_score">Current CIBIL Score (300-900)</label>
+                                <input type="number" id="sim-cibil-input" class="form-input" min="300" max="900" value="670">
+                            </div>
+
+                            <h4 style="margin: 1.25rem 0 0.75rem 0; font-size: 0.95rem;">Select Actionable Improvement Steps:</h4>
+                            <div class="checklist-container">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="chk-util" checked onchange="calculateCibilSimulation()">
+                                    <span data-i18n="cibil_action_util">Pay credit card balances below 30% (+35 pts)</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="chk-overdue" checked onchange="calculateCibilSimulation()">
+                                    <span data-i18n="cibil_action_overdue">Clear past due / delayed EMI accounts (+45 pts)</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="chk-autodebit" checked onchange="calculateCibilSimulation()">
+                                    <span data-i18n="cibil_action_autodebit">Set up automated bank mandate / NACH (+20 pts)</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="chk-inquiries" onchange="calculateCibilSimulation()">
+                                    <span data-i18n="cibil_action_inquiries">Avoid applying to multiple banks directly (+15 pts)</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="chk-mix" onchange="calculateCibilSimulation()">
+                                    <span data-i18n="cibil_action_mix">Maintain healthy secured & unsecured credit mix (+10 pts)</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- CIBIL Meter Preview -->
+                        <div class="cibil-preview-panel">
+                            <div class="scores-display-grid">
+                                <div>
+                                    <span class="label" data-i18n="cibil_cur_score">Current Score</span>
+                                    <div id="sim-score-before" class="score-number score-mid">670</div>
+                                </div>
+                                <div style="font-size: 2rem; color: var(--secondary);">➔</div>
+                                <div>
+                                    <span class="label" data-i18n="cibil_proj_score">Projected Score</span>
+                                    <div id="sim-score-after" class="score-number score-high">770</div>
+                                </div>
+                            </div>
+
+                            <div class="points-badge" id="sim-points-badge">+100 Points Potential</div>
+
+                            <div class="sim-metric-row">
+                                <span>Current Approval Odds:</span>
+                                <strong id="sim-odds-before">72%</strong>
+                            </div>
+                            <div class="sim-metric-row">
+                                <span>Projected Approval Odds:</span>
+                                <strong id="sim-odds-after" style="color: var(--accent-green);">95%</strong>
+                            </div>
+                            <div class="sim-metric-row">
+                                <span>Estimated Rate Discount:</span>
+                                <strong id="sim-rate-benefit" style="color: var(--secondary);">0.5% - 1.5% lower p.a.</strong>
+                            </div>
+
+                            <button class="btn btn-primary" style="margin-top: 1.5rem; width: 100%;" onclick="applySimulatedScoreToForm()">Apply This Score to Application Form</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- TAB 4: LOAN HISTORY -->
             <div id="history" class="tab-container">
                 <div class="history-section">
                     <h3 style="font-size: 1.5rem; margin-bottom: 0.5rem;" data-i18n="hist_title">Your Loan Search History</h3>
-                    <p style="font-size: 0.9rem; margin-bottom: 2rem;" data-i18n="hist_subtitle">Track your past searches and recommendations saved on our platform.</p>
+                    <p style="font-size: 0.9rem; margin-bottom: 2rem; color: var(--text-secondary);" data-i18n="hist_subtitle">Track your past searches and recommendations saved on our platform.</p>
                     
                     <div id="history-list-container"></div>
                 </div>
             </div>
+
             <!-- TAB 5: LOGIN / SIGN UP -->
             <div id="auth" class="tab-container">
                 <div class="auth-box glass-card">
@@ -331,6 +534,7 @@
                         <button id="auth-tab-login-btn" class="auth-tab active" onclick="toggleAuthTab('login')" data-i18n="auth_tab_login">Login</button>
                         <button id="auth-tab-reg-btn" class="auth-tab" onclick="toggleAuthTab('register')" data-i18n="auth_tab_register">Register Account</button>
                     </div>
+
                     <!-- Login Form -->
                     <div id="login-form-box">
                         <form id="login-form-el">
@@ -344,7 +548,11 @@
                             </div>
                             <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;" data-i18n="btn_login">Access Account</button>
                         </form>
+                        <div style="margin-top: 1.25rem; font-size: 0.8rem; color: var(--text-secondary); text-align: center;">
+                            Demo credentials: <strong>borrower</strong> / <strong>borrower123</strong> (User) or <strong>admin</strong> / <strong>admin123</strong> (Admin)
+                        </div>
                     </div>
+
                     <!-- Register Form -->
                     <div id="register-form-box" style="display: none;">
                         <form id="register-form-el">
@@ -372,11 +580,12 @@
                     </div>
                 </div>
             </div>
+
             <!-- TAB 6: ADMIN PORTAL -->
             <div id="admin" class="tab-container">
                 <div class="glass-card">
                     <h3 style="font-size: 1.5rem; margin-bottom: 0.5rem;" data-i18n="admin_title">Lender Product Management Dashboard</h3>
-                    <p style="font-size: 0.9rem; margin-bottom: 2rem;" data-i18n="admin_subtitle">Add, modify, or remove loan products from the SmartLoan AI engine.</p>
+                    <p style="font-size: 0.9rem; margin-bottom: 2rem; color: var(--text-secondary);" data-i18n="admin_subtitle">Add, modify, or remove loan products from the SmartLoan AI engine.</p>
                     
                     <div class="analytics-grid" style="margin-bottom: 2rem;">
                         <div class="analytics-card">
@@ -400,6 +609,7 @@
                             <p id="stat-popular">None</p>
                         </div>
                     </div>
+
                     <div style="overflow-x: auto;">
                         <table class="offers-table">
                             <thead>
@@ -420,6 +630,7 @@
                         </table>
                     </div>
                 </div>
+
                 <!-- Add product card -->
                 <div class="glass-card" style="margin-top: 1.5rem;">
                     <h4 style="font-size: 1.25rem; margin-bottom: 1.5rem;" data-i18n="btn_add_lender">Add New Loan Product</h4>
@@ -444,6 +655,7 @@
                                 </select>
                             </div>
                         </div>
+
                         <div class="grid-4">
                             <div class="form-group">
                                 <label for="adm-min-credit">Minimum CIBIL Score</label>
@@ -462,6 +674,7 @@
                                 <input type="number" id="adm-rate" class="form-input" step="0.05" value="10.5" required>
                             </div>
                         </div>
+
                         <div class="grid-4">
                             <div class="form-group">
                                 <label for="adm-fee-pct">Processing Fee (%)</label>
@@ -480,6 +693,7 @@
                                 <input type="number" id="adm-prep-pct" class="form-input" step="0.1" value="2.0" required>
                             </div>
                         </div>
+
                         <div class="grid-3">
                             <div class="form-group">
                                 <label for="adm-tenure-min">Minimum Tenure (Years)</label>
@@ -494,6 +708,7 @@
                                 <input type="text" id="adm-docs" class="form-input" value="PAN Card;Aadhaar Card;Salary Slips;Bank Statement (6 months)" required>
                             </div>
                         </div>
+
                         <div style="display: flex; justify-content: flex-end; margin-top: 1rem;">
                             <button type="submit" class="btn btn-secondary" data-i18n="btn_add_lender">Add New Loan Product</button>
                         </div>
@@ -503,7 +718,7 @@
                 <!-- User Management Card -->
                 <div class="glass-card" style="margin-top: 1.5rem;">
                     <h3 style="font-size: 1.5rem; margin-bottom: 0.5rem;" data-i18n="admin_users_title">Manage User Accounts</h3>
-                    <p style="font-size: 0.9rem; margin-bottom: 2rem;" data-i18n="admin_users_subtitle">Change user authorization levels or delete profiles.</p>
+                    <p style="font-size: 0.9rem; margin-bottom: 2rem; color: var(--text-secondary);" data-i18n="admin_users_subtitle">Change user authorization levels or delete profiles.</p>
                     
                     <div style="overflow-x: auto;">
                         <table class="offers-table">
@@ -532,6 +747,7 @@
             <div class="compare-selections" id="compare-bubbles"></div>
             <button id="compare-action-btn" class="btn btn-primary btn-sm" onclick="triggerCompareResults()" disabled data-i18n="btn_compare">Compare Selected</button>
         </div>
+
         <!-- DETAILS BREAKDOWN MODAL -->
         <div id="details-modal" class="modal-overlay">
             <div class="modal-box">
@@ -562,39 +778,48 @@
                             <h5 data-i18n="det_insurance">Insurance Premium:</h5>
                             <p id="det-insurance-val">₹0</p>
                         </div>
-                        <div class="details-item" style="grid-column: span 2; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 0.75rem;">
-                            <h5 data-i18n="det_total">Total Cost of Borrowing:</h5>
-                            <p id="det-total-val" style="font-size: 1.4rem; color: var(--accent-green);">₹0</p>
+                        <div class="details-item">
+                            <h5 data-i18n="det_net_disbursement">Net Disbursed to Bank:</h5>
+                            <p id="det-net-val" style="color: var(--secondary);">₹0</p>
                         </div>
-                        <div class="details-item" style="grid-column: span 2;">
+                        <div class="details-item">
                             <h5 data-i18n="det_prepayment">Prepayment Penalty:</h5>
                             <p id="det-prepayment-val" style="font-size: 0.95rem;">0%</p>
                         </div>
+                        <div class="details-item" style="grid-column: span 2; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 0.75rem;">
+                            <h5 data-i18n="det_total">Total Cost of Borrowing:</h5>
+                            <p id="det-total-val" style="font-size: 1.4rem; color: var(--accent-green); font-weight: 700;">₹0</p>
+                        </div>
                     </div>
+
                     <!-- AI remarks -->
                     <div class="advice-card">
                         <h5 data-i18n="det_advice" style="color: var(--primary); font-size: 0.75rem; text-transform: uppercase; margin-bottom: 0.5rem; font-weight: 700;">AI Advisor Commentary:</h5>
                         <p id="det-advice-val">Commentary loading...</p>
                     </div>
+
                     <!-- Rejection reasons if any -->
                     <div id="det-rejection-reasons" style="display: none;">
                         <h5 style="color: var(--accent-red); font-size: 0.8rem; text-transform: uppercase; margin-bottom: 0.5rem; font-weight: 700;">Rejection Flags:</h5>
                         <ul id="det-rejection-list" style="list-style: none; padding-left: 0.5rem;"></ul>
                     </div>
+
                     <!-- Docs required list -->
                     <div>
                         <h5 data-i18n="det_docs" style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.5rem; font-weight: 700;">Required Documentation:</h5>
                         <ul id="det-docs-list" style="list-style: none; padding-left: 0.5rem;"></ul>
                     </div>
+
                     <div style="display: flex; justify-content: flex-end; margin-top: 1rem;">
                         <button class="btn btn-outline" onclick="closeModal()" data-i18n="btn_close">Close Window</button>
                     </div>
                 </div>
             </div>
         </div>
+
         <!-- COMPARE SIDE-BY-SIDE MODAL -->
         <div id="compare-modal" class="modal-overlay">
-            <div class="modal-box" style="width: 900px; max-width: 95%;">
+            <div class="modal-box" style="width: 920px; max-width: 95%;">
                 <div class="modal-header">
                     <div>
                         <h3 data-i18n="btn_compare">Compare Loan Offers</h3>
@@ -611,7 +836,53 @@
                 </div>
             </div>
         </div>
+
+        <!-- FLOATING AI FINANCIAL COACH -->
+        <div id="coach-widget-container" class="coach-container">
+            <!-- Launcher Button -->
+            <button id="coach-launcher" class="coach-launcher-btn" onclick="toggleCoachWindow()">
+                <div class="coach-avatar-bubble">🤖</div>
+                <span data-i18n="coach_launcher">Ask AI Coach</span>
+            </button>
+
+            <!-- Chat Window -->
+            <div id="coach-window" class="coach-window" style="display: none;">
+                <div class="coach-header">
+                    <div style="display: flex; align-items: center; gap: 0.6rem;">
+                        <div class="coach-avatar-sm">🤖</div>
+                        <div>
+                            <h4 data-i18n="coach_title" style="margin: 0; font-size: 0.95rem; color: #fff;">SmartLoan AI Coach</h4>
+                            <span style="font-size: 0.72rem; color: var(--accent-green);">● Active Advisory</span>
+                        </div>
+                    </div>
+                    <button class="coach-close-btn" onclick="toggleCoachWindow()">×</button>
+                </div>
+
+                <!-- Quick Prompts -->
+                <div class="coach-quick-chips">
+                    <button class="chip" onclick="sendQuickCoachMessage('cibil')" data-i18n="coach_quick_cibil">How to increase CIBIL?</button>
+                    <button class="chip" onclick="sendQuickCoachMessage('dti')" data-i18n="coach_quick_dti">What is DTI ratio?</button>
+                    <button class="chip" onclick="sendQuickCoachMessage('fees')" data-i18n="coach_quick_fees">Explain hidden fees</button>
+                    <button class="chip" onclick="sendQuickCoachMessage('docs')" data-i18n="coach_quick_docs">Home Loan documents</button>
+                </div>
+
+                <!-- Messages area -->
+                <div class="coach-messages" id="coach-messages-area">
+                    <div class="coach-bubble coach-bubble-bot">
+                        Hello! I am your <strong>SmartLoan AI Financial Coach</strong>. Ask me any question about loan eligibility, improving your credit score, calculating hidden charges, or document checklists!
+                    </div>
+                </div>
+
+                <!-- Input area -->
+                <form id="coach-input-form" class="coach-input-form" onsubmit="handleCoachSubmit(event)">
+                    <input type="text" id="coach-input-text" class="coach-input" placeholder="Type your question..." data-i18n-placeholder="coach_placeholder" autocomplete="off" required>
+                    <button type="submit" class="coach-send-btn" data-i18n="coach_send">Send</button>
+                </form>
+            </div>
+        </div>
+
     </div>
+
     <!-- Translations & App scripts -->
     <script src="{{ url_for('static', filename='js/translations.js') }}"></script>
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>
