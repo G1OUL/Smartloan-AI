@@ -13,10 +13,12 @@ app.secret_key = os.urandom(24)
 DB_PATH = os.path.join(os.path.dirname(__file__), 'database.db')
 MODEL_PATH = os.path.join(os.path.dirname(__file__), 'loan_classifier.pkl')
 
+
 def get_db_connection():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
+
 
 # Helper: calculate EMI
 def calculate_emi(principal, annual_rate, tenure_years):
@@ -27,8 +29,10 @@ def calculate_emi(principal, annual_rate, tenure_years):
     emi = principal * r * (math.pow(1 + r, n)) / (math.pow(1 + r, n) - 1)
     return round(emi, 2)
 
+
 # --- Phase 2: ML Model Management ---
 _cached_ml_model = None
+
 
 def get_or_train_ml_model():
     global _cached_ml_model
@@ -62,7 +66,8 @@ def get_or_train_ml_model():
         print(f"ML Pipeline Initialization Notice: {ex}")
         return None
 
-# Dual-Engine: Phase 1 (Rule-based) & Phase 2 (ML Random Forest)
+
+# Dual-Engine: Phase 1 (Rule-based) & Phase 2 (ML Random Forest
 def evaluate_loan_offers(income, existing_emis, credit_score, loan_amount, tenure_years, loan_type, employment_type, engine_mode='ensemble'):
     conn = get_db_connection()
     lenders = conn.execute("SELECT * FROM lenders WHERE loan_type = ?", (loan_type,)).fetchall()
@@ -91,7 +96,7 @@ def evaluate_loan_offers(income, existing_emis, credit_score, loan_amount, tenur
     raw_ml_prob = None
     if ml_model is not None:
         try:
-            df_input = pd.DataFrame([{
+            df_input = pd.DataFrame([{ 
                 'income': float(income),
                 'existing_emis': float(existing_emis),
                 'credit_score': int(credit_score),
@@ -178,7 +183,7 @@ def evaluate_loan_offers(income, existing_emis, credit_score, loan_amount, tenur
             final_prob = rule_prob
         elif engine_mode == 'ml':
             final_prob = ml_prob if is_eligible else 0
-        else: # Ensemble
+        else:  # Ensemble
             if is_eligible:
                 final_prob = round(0.5 * rule_prob + 0.5 * ml_prob, 1)
             else:
@@ -243,10 +248,12 @@ def evaluate_loan_offers(income, existing_emis, credit_score, loan_amount, tenur
     offers.sort(key=lambda x: (not x['is_eligible'], -x['approval_probability'], x['total_cost']))
     return offers
 
+
 # Routes
 @app.route('/')
 def index():
     return render_template('index.html')
+
 
 # Authentication APIs
 @app.route('/api/auth/register', methods=['POST'])
@@ -278,6 +285,7 @@ def register():
 
     return jsonify({'message': 'Registration successful. You can log in now!'})
 
+
 @app.route('/api/auth/login', methods=['POST'])
 def login():
     data = request.get_json() or {}
@@ -307,10 +315,12 @@ def login():
 
     return jsonify({'error': 'Invalid username or password'}), 401
 
+
 @app.route('/api/auth/logout', methods=['POST', 'GET'])
 def logout():
     session.clear()
     return jsonify({'message': 'Logged out successfully'})
+
 
 @app.route('/api/auth/me', methods=['GET'])
 def me():
@@ -324,6 +334,7 @@ def me():
     if user:
         return jsonify({'user': dict(user)})
     return jsonify({'user': None})
+
 
 @app.route('/api/auth/profile', methods=['PUT'])
 def update_profile():
@@ -362,6 +373,7 @@ def update_profile():
     conn.close()
     return jsonify({'message': 'Profile updated successfully'})
 
+
 # Recommendations & Search API
 @app.route('/api/loans/search', methods=['POST'])
 def search_loans():
@@ -374,7 +386,7 @@ def search_loans():
         tenure_years = int(data.get('tenure_years', 1))
         loan_type = data.get('loan_type', 'Personal')
         employment_type = data.get('employment_type', 'Salaried')
-        engine_mode = data.get('engine_mode', 'ensemble') # 'ensemble', 'rule', 'ml'
+        engine_mode = data.get('engine_mode', 'ensemble')  # 'ensemble', 'rule', 'ml'
     except (ValueError, TypeError):
         return jsonify({'error': 'Invalid numerical values provided'}), 400
 
@@ -397,9 +409,22 @@ def search_loans():
         eligible_offers = [o for o in offers if o['is_eligible']][:3]
         for offer in eligible_offers:
             cursor.execute('''
-                INSERT INTO saved_offers (user_id, application_id, lender_name, loan_name, loan_type, interest_rate, monthly_emi, total_interest, total_cost, approval_probability)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (user_id, app_id, offer['lender_name'], offer['loan_name'], offer['loan_type'], offer['interest_rate'], offer['monthly_emi'], offer['total_interest'], offer['total_cost'], offer['approval_probability']))
+                INSERT INTO saved_offers (
+                    user_id, application_id, lender_name, loan_name, loan_type,
+                    interest_rate, monthly_emi, total_interest, total_cost, approval_probability
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                user_id,
+                app_id,
+                offer['lender_name'],
+                offer['loan_name'],
+                offer['loan_type'],
+                offer['interest_rate'],
+                offer['monthly_emi'],
+                offer['total_interest'],
+                offer['total_cost'],
+                offer['approval_probability']
+            ))
 
         conn.commit()
         conn.close()
@@ -417,6 +442,7 @@ def search_loans():
             'employment_type': employment_type
         }
     })
+
 
 # CIBIL Score Simulator API
 @app.route('/api/cibil/optimize', methods=['POST'])
@@ -448,10 +474,14 @@ def optimize_cibil():
 
     # Estimate approval probability before and after
     def score_to_prob(s):
-        if s < 600: return 25
-        if s < 650: return 50
-        if s < 700: return 72
-        if s < 750: return 85
+        if s < 600:
+            return 25
+        if s < 650:
+            return 50
+        if s < 700:
+            return 72
+        if s < 750:
+            return 85
         return 95
 
     return jsonify({
@@ -463,6 +493,7 @@ def optimize_cibil():
         'estimated_rate_discount': "0.5% - 1.5% lower p.a." if projected_score >= 750 and current_score < 750 else "Best market tier",
         'actions_applied': selected_tips
     })
+
 
 # EMI Optimization API
 @app.route('/api/emi/optimize', methods=['POST'])
@@ -509,6 +540,7 @@ def optimize_emi():
         'tenure_options': tenure_options[:15]
     })
 
+
 # AI Financial Coach API (Conversational Advisory)
 @app.route('/api/coach/chat', methods=['POST'])
 def coach_chat():
@@ -524,46 +556,46 @@ def coach_chat():
     reply_ta = ""
 
     if any(k in message for k in ['cibil', 'credit score', 'score', 'cibil score']):
-        reply_en = "Your CIBIL score (300-900) determines your loan eligibility and interest rates. Above 750 gives you prime rates and fastest approvals. To boost your score: keep credit card utilization below 30%, pay every EMI before the due date, and avoid applying to multiple banks within a short window."
-        reply_hi = "आपका सिबिल स्कोर (300-900) आपकी ऋण पात्रता और ब्याज दर तय करता है। 750 से ऊपर स्कोर होने पर सबसे कम ब्याज दर और तुरंत मंज़ूरी मिलती है। स्कोर बढ़ाने के लिए: क्रेडिट कार्ड का उपयोग 30% से कम रखें और हर ईएमआई समय पर भरें।"
-        reply_mr = "तुमचा सिबिल स्कोअर (300-900) तुमची कर्ज पात्रता आणि व्याजदर ठरवतो. 750 पेक्षा जास्त स्कोअर असल्यास सर्वात कमी व्याजदरावर जलद मंजुरी मिळते. स्कोअर वाढवण्यासाठी क्रेडिट कार्ड वापर 30% पेक्षा कमी ठेवा आणि सर्व ईएमआय वेळेवर भरा."
-        reply_gu = "તમારો CIBIL સ્કોર (300-900) તમારી લોન પાત્રતા અને વ્યાજ દર નક્કી કરે છે. 750થી વધુ સ્કોર તમને સૌથી ઓછો વ્યાજ દર આપે છે. સ્કોર વધારવા માટે ક્રેડિટ કાર્ડનો વપરાશ 30%થી ઓછો રાખો અને બધી EMI સમયસર ભરો."
-        reply_ta = "உங்கள் CIBIL மதிப்பெண் (300-900) உங்கள் கடன் தகுதி மற்றும் வட்டி விகிதத்தை தீர்மானிக்கிறது. 750க்கு மேல் இருந்தால் குறைந்த வட்டி மற்றும் விரைவான ஒப்புதல் கிடைக்கும். மதிப்பெண்ணை உயர்த்த கிரெடிட் கார்டு பயன்பாட்டை 30%க்கு கீழ் வைத்து சரியான நேரத்தில் EMI செலுத்துங்கள்."
+        reply_en = "Your CIBIL score (300-900) determines your loan eligibility and interest rates. Above 750 gives you prime rates and fastest approvals. To boost your score: keep credit card utilization below 30%, pay EMIs on time, avoid too many credit inquiries, and maintain a healthy credit mix."
+        reply_hi = "आपका सिबिल स्कोर (300-900) आपकी ऋण पात्रता और ब्याज दर तय करता है। 750 से ऊपर होने पर आपको प्राइम दरें और तेज़ स्वीकृति मिलती है। स्कोर बढ़ाने के लिए: क्रेडिट कार्ड उपयोग 30% से कम रखें, EMI समय पर चुकाएं, बहुत ज़्यादा inquiry से बचें, और संतुलित क्रेडिट मिक्स बनाए रखें।"
+        reply_mr = "तुमचा सिबिल स्कोअर (300-900) तुमची कर्ज पात्रता आणि व्याजदर ठरवतो. 750 पेक्षा जास्त असल्यास तुम्हाला प्राइम दर आणि जलद मंजुरी मिळते. स्कोअर वाढवण्यासाठी: क्रेडिट कार्ड वापर 30% पेक्षा कमी ठेवा, EMI वेळेवर भरा, जास्त inquiry टाळा आणि संतुलित क्रेडिट मिक्स ठेवा."
+        reply_gu = "તમારો CIBIL સ્કોર (300-900) તમારી લોન પાત્રતા અને વ્યાજ દર નક્કી કરે છે. 750 થી ઉપર હોય તો તમને પ્રાઇમ રેટ અને ઝડપી મંજૂરી મળે છે. સ્કોર વધારવા માટે: ક્રેડિટ કાર્ડ ઉપયોગ 30%થી નીચે રાખો, EMI સમય પર ચૂકવો, વધુ enquiryથી બચો અને સંતુલિત ક્રેડિટ મિક્સ રાખો."
+        reply_ta = "உங்கள் CIBIL மதிப்பெண் (300-900) உங்கள் கடன் தகுதி மற்றும் வட்டி விகிதத்தை தீர்மானிக்கிறது. 750-க்கு மேல் இருந்தால் பிரைம் வட்டி மற்றும் வேகமான ஒப்புதல் கிடைக்கும். மதிப்பெண்ணை உயர்த்த: கிரெடிட் கார்டு பயன்பாட்டை 30%க்கு கீழ் வைத்திருங்கள், EMIஐ சரியான நேரத்தில் செலுத்துங்கள், அதிக enquiryகளைக் தவிர்க்கவும், நல்ல கிரெடிட் கலவையை பராமரிக்கவும்."
 
     elif any(k in message for k in ['dti', 'debt to income', 'ratio', 'existing']):
-        reply_en = "Debt-to-Income (DTI) is the percentage of your monthly income used to pay EMIs (existing + new loan). Banks strictly look for DTI under 40-50%. If your DTI is too high, you can extend the loan tenure or add an earning co-borrower to qualify."
-        reply_hi = "डेट-टू-इनकम (DTI) अनुपात यह दर्शाता है कि आपकी मासिक आय का कितना हिस्सा ईएमआई में जा रहा है। बैंक इसे 40-50% से कम पसंद करते हैं। DTI सुधारने के लिए लोन की अवधि बढ़ाएं या सह-आवेदक (Co-borrower) जोड़ें।"
-        reply_mr = "डेट-टू-इन्कम (DTI) रेश्यो दर्शवतो की तुमच्या उत्पन्नाचा किती भाग कर्जाच्या हप्त्यांमध्ये जात आहे. बँका 50% पेक्षा कमी DTI पसंत करतात. DTI कमी करण्यासाठी कर्जाची मुदत वाढवा किंवा सह-अर्जदार जोडा."
-        reply_gu = "ડેબ્ટ-ટુ-ઇનકમ (DTI) રેશિયો બતાવે છે કે તમારી માસિક આવકનો કેટલો ભાગ EMIમાં જાય છે. બેંકો 50%થી ઓછો રેશિયો પસંદ કરે છે. DTI સુધારવા માટે લોનની મુદત વધારો."
-        reply_ta = "கடன்-வருமான விகிதம் (DTI) உங்கள் மாத வருமானத்தில் எவ்வளவு EMIக்கு செல்கிறது என்பதைக் குறிக்கிறது. வங்கிகள் 50%க்கு குறைவாக இருக்க விரும்புகின்றன. இதை குறைக்க கடன் தவணைக்காலத்தை அதிகரிக்கவும்."
+        reply_en = "Debt-to-Income (DTI) is the percentage of your monthly income used to pay EMIs (existing + new loan). Banks strictly look for DTI under 40-50%. If your DTI is too high, you can reduce it by increasing income, paying down existing EMIs, or choosing a longer tenure."
+        reply_hi = "डेट-टू-इनकम (DTI) अनुपात यह दर्शाता है कि आपकी मासिक आय का कितना हिस्सा मौजूदा और नए EMI में जाता है। बैंक आमतौर पर 40-50% से नीचे DTI देखना पसंद करते हैं। अगर DTI अधिक है, तो आय बढ़ाएं, पुराने EMI घटाएं, या लंबी अवधि चुनें।"
+        reply_mr = "डेट-टू-इन्कम (DTI) रेश्यो दर्शवतो की तुमच्या मासिक उत्पन्नाचा किती भाग अस्तित्वातील आणि नवीन EMI मध्ये जातो. बँका सामान्यतः 40-50% पेक्षा कमी DTI पाहतात. DTI जास्त असल्यास उत्पन्न वाढवा, जुने EMI कमी करा किंवा जास्त कालावधी निवडा."
+        reply_gu = "ડેબ્ટ-ટુ-ઇનકમ (DTI) રેશિયો બતાવે છે કે તમારી માસિક આવકનો કેટલો ભાગ હાલના અને નવા EMIમાં જતો હોય છે. બેંકો સામાન્ય રીતે 40-50% થી નીચેનો DTI પસંદ કરે છે. DTI વધુ હોય તો આવક વધારें, હાલના EMI ઘટાડો અથવા લાંબી મુદત પસંદ કરો."
+        reply_ta = "கடன்-வருமான விகிதம் (DTI) என்பது உங்கள் மாத வருமானத்தில் தற்போதைய மற்றும் புதிய EMIக்கு எவ்வளவு பங்கு செலவாகிறது என்பதைக் குறிக்கிறது. வங்கிகள் பொதுவாக 40-50%க்கு கீழ் உள்ள DTIஐ விரும்புகின்றனர். DTI அதிகமாக இருந்தால் வருமானத்தை அதிகரிக்கவும், தற்போதைய EMIகளை குறைக்கவும் அல்லது நீண்ட காலத்தை தேர்வு செய்யவும்."
 
     elif any(k in message for k in ['fee', 'hidden', 'cost', 'charge', 'processing', 'prepayment', 'foreclosure']):
-        reply_en = "Never look only at the interest rate! Hidden costs include Processing Fees (0.5% - 2% + 18% GST), Mandatory Insurance, and Prepayment Penalties (2% - 4% if closing early). SmartLoan AI calculates the Grand Total Cost of Borrowing so you never pay unexpected charges."
-        reply_hi = "सिर्फ ब्याज दर न देखें! छिपे हुए शुल्कों में प्रोसेसिंग फीस (0.5% - 2%), लोन बीमा और समय से पहले भुगतान जुर्माना (Prepayment Penalty) शामिल हैं। स्मार्टलोन एआई कुल वास्तविक लागत (Total Cost) दिखाता है।"
-        reply_mr = "केवळ व्याजदर पाहू नका! लपलेले शुल्क जसे की प्रोसेसिंग फी, विमा आणि प्रीपेमेंट पेनल्टी यामुळे एकूण खर्च वाढतो. स्मार्टलोन एआय तुम्हाला सर्व शुल्कांसह खरी एकूण रक्कम दाखवते."
-        reply_gu = "માત્ર વ્યાજ દર ન જોશો! છૂપા ચાર્જીસ જેવા કે પ્રોસેસિંગ ફી, ઇન્સ્યોરન્સ અને પ્રીપેમેન્ટ પેનલ્ટી ખર્ચ વધારે છે. સ્માર્ટલોન AI તમને સાચો કુલ ખર્ચ બતાવે છે."
-        reply_ta = "வட்டி விகிதத்தை மட்டும் பார்க்காதீர்கள்! செயலாக்க கட்டணம், காப்பீடு மற்றும் முன்கூட்டியே செலுத்தும் அபராதம் போன்ற மறைமுக கட்டணங்களை எங்கள் SmartLoan AI வெளிப்படையாக காட்டுகிறது."
+        reply_en = "Never look only at the interest rate! Hidden costs include processing fees (0.5% - 2% + GST), mandatory insurance, and prepayment penalties (2% - 4% if closing early). Smart borrowers compare total cost of borrowing, not just monthly EMI."
+        reply_hi = "सिर्फ ब्याज दर न देखें! छिपे हुए शुल्कों में प्रोसेसिंग फीस (0.5% - 2% + GST), अनिवार्य बीमा और प्रीपेमेंट पेनल्टी (जल्दी बंद करने पर 2% - 4%) शामिल होते हैं। स्मार्ट उधारकर्ता सिर्फ EMI नहीं, कुल ऋण लागत की तुलना करते हैं।"
+        reply_mr = "केवळ व्याजदर पाहू नका! लपलेले शुल्क ज्यामध्ये प्रोसेसिंग फी (0.5% - 2% + GST), अनिवार्य विमा आणि प्रीपेमेंट पेनल्टी (जल्दी बंद केल्यावर 2% - 4%) समाविष्ट असतात. स्मार्ट उधारदार फक्त EMI नाही, एकूण कर्ज खर्चाची तुलना करतात."
+        reply_gu = "માત્ર વ્યાજ દર જોશો નહીં! છૂપા ચાર્જીસમાં પ્રોસેસિંગ ફી (0.5% - 2% + GST), compulsory insurance, અને prepayment penalty (ઝૂકાવું બંધ કરાવામાં 2% - 4%) શામેલ છે. સ્માર્ટ उधારનાર ફક્ત EMI નહીં, કુલ લોન ખર્ચની સરખામણી કરે છે."
+        reply_ta = "வட்டி விகிதத்தை மட்டும் பார்ப்பதை தவிர்க்கவும்! மறைமுக செலவுகளில் செயலாக்கக் கட்டணம் (0.5% - 2% + GST), கட்டாய காப்பீடு, மற்றும் முன்கூட்டியே செலுத்தும் அபராதம் (விரைவாக மூடும்போது 2% - 4%) அடங்கும். புத்திசாலித்தனமான கடன் வாங்குபவர்கள் மாத EMI மட்டும் பார்க்காமல் மொத்த கடன் செலவையும் ஒப்பிடுகின்றனர்."
 
     elif any(k in message for k in ['document', 'docs', 'paper', 'pan', 'aadhaar', 'digilocker', 'itr']):
-        reply_en = "Standard required documents: 1) Identity & Address: PAN Card & Aadhaar (download instantly via DigiLocker), 2) Income: 3-month salary slips & 6-month bank statement (e-statement PDF), 3) For Business: 2-year ITR & GST registration. For Education: University admission letter."
-        reply_hi = "ज़रूरी दस्तावेज़: 1) पहचान प्रमाण: पैन और आधार कार्ड (DigiLocker से तुरंत प्राप्त करें), 2) आय प्रमाण: 3 महीने की सैलरी स्लिप और 6 महीने का बैंक स्टेटमेंट, 3) व्यवसाय के लिए: 2 साल का ITR और GST रजिस्ट्रेशन।"
-        reply_mr = "आवश्यक कागदपत्रे: 1) ओळख पुरावा: पॅन कार्ड आणि आधार कार्ड (DigiLocker द्वारे), 2) उत्पन्न पुरावा: 3 महिन्यांच्या सॅलरी स्लिप्स आणि 6 महिन्यांचे बँक स्टेटमेंट, 3) व्यवसायासाठी: 2 वर्षांचे ITR आणि GST नोंदणी."
-        reply_gu = "જરૂરી દસ્તાવેજો: 1) ઓળખ પુરાવો: PAN કાર્ડ અને આધાર કાર્ડ (DigiLocker દ્વારા), 2) આવક પુરાવો: 3 મહિનાની પગાર સ્લિપ અને 6 મહિનાનું બેંક સ્ટેટમેન્ટ, 3) બિઝનેસ માટે: 2 વર્ષનું ITR અને GST નોંધણી."
-        reply_ta = "தேவையான ஆவணங்கள்: 1) பான் கார்டு மற்றும் ஆதார் அட்டை (DigiLocker மூலம்), 2) வருமான சான்று: 3 மாத சம்பள சீட்டு & 6 மாத வங்கி கணக்கு அறிக்கை, 3) வணிகத்திற்கு: 2 வருட ITR & GST சான்றிதழ்."
+        reply_en = "Standard required documents: 1) Identity & Address: PAN Card & Aadhaar (download instantly via DigiLocker), 2) Income: 3-month salary slips & 6-month bank statement (e-statement), 3) Employment proof and residence proof."
+        reply_hi = "ज़रूरी दस्तावेज़: 1) पहचान: पैन और आधार (DigiLocker से तुरंत डाउनलोड), 2) आय-संबंधित: 3 महीने का सैलरी स्लिप और 6 महीने का बैंक स्टेटमेंट, 3) रोजगार और पता प्रमाण."
+        reply_mr = "आवश्यक कागदपत्रे: 1) ओळख आणि पत्ता: पॅन कार्ड आणि आधार (DigiLocker वरून त्वरित डाउनलोड), 2) उत्पन्न: 3 महिन्यांचे सॅलरी स्लिप्स आणि 6 महिन्यांचे बँक स्टेटमेंट, 3) नोकरी आणि पत्ता पुरावा."
+        reply_gu = "જરૂરી દસ્તાવેજો: 1) ઓળખ અને સરનામું: PAN Card અને Aadhaar (DigiLockerમાંથી ફટાફટ ડાઉનલોડ), 2) આવક: 3 મહિનાની સેલેરી સ્લિપ અને 6 મહિના bancaire સ્ટેટમેન્ટ, 3) નોકરી અને સરનામાનો પુરાવો."
+        reply_ta = "தேவையான ஆவணங்கள்: 1) அடையாளம் மற்றும் முகவரி: பான் கார்டு மற்றும் ஆதார் (DigiLocker மூலம் உடனடியாக பதிவிறக்கம்), 2) வருமானம்: 3 மாத சம்பளச் சீட்டு மற்றும் 6 மாத வங்கி அறிக்கை, 3) வேலை மற்றும் முகவரி சான்றுகள்."
 
     elif any(k in message for k in ['first time', 'student', 'beginner', 'fresher', 'education']):
-        reply_en = "Welcome! As a first-time applicant: 1) For Education loans up to ₹7.5 Lakhs under government CSIS schemes, collateral is not required. 2) Add an earning parent as co-borrower to get fast approval. 3) Prioritize loans with 0% prepayment penalty."
-        reply_hi = "नमस्ते! पहली बार आवेदन करने वालों के लिए सलाह: 1) ₹7.5 लाख तक के शिक्षा ऋण में सरकारी योजना के तहत गारंटी की ज़रूरत नहीं होती। 2) कमाने वाले माता-पिता को सह-आवेदक (Co-borrower) बनाएं। 3) शून्य प्रीपेमेंट पेनल्टी वाले लोन चुनें।"
-        reply_mr = "स्वागत आहे! पहिल्यांदा कर्ज घेणाऱ्यांसाठी सल्ला: 1) ₹7.5 लाखांपर्यंतच्या शैक्षणिक कर्जासाठी तारण आवश्यक नाही. 2) जलद मंजुरीसाठी पालकांना सह-अर्जदार बनवा. 3) झिरो प्रीपेमेंट पेनल्टी असलेल्या पर्यायांना प्राधान्य द्या."
-        reply_gu = "સ્વાગત છે! પ્રથમ વખતના અરજદારો માટે: 1) ₹7.5 લાખ સુધીની એજ્યુકેશન લોન માટે કોલેટરલની જરૂર નથી હોતી. 2) ઝડપી મંજૂરી માટે માતા-પિતાને સહ-અરજદાર બનાવો."
-        reply_ta = "வணக்கம்! முதல் முறை விண்ணப்பதாரர்களுக்கு: 1) ₹7.5 லட்சம் வரையிலான கல்விக்கடனுக்கு பிணை தேவையில்லை. 2) விரைவான ஒப்புதலுக்கு பெற்றோரை இணை விண்ணப்பதாரராக சேர்க்கவும்."
+        reply_en = "Welcome! As a first-time applicant: 1) For Education loans up to ₹7.5 Lakhs under government CSIS schemes, collateral is often not required. 2) Add an earning parent as co-borrower if needed. 3) Keep your CIBIL clean and avoid multiple loan applications."
+        reply_hi = "नमस्ते! पहली बार आवेदन करने वालों के लिए: 1) ₹7.5 लाख तक के शिक्षा ऋण पर सरकारी CSIS योजना के तहत अक्सर collateral नहीं चाहिए. 2) जरूरत पड़ने पर कमाने वाले माता-पिता को co-borrower बनाएं. 3) CIBIL साफ रखें और कई लोन applications से बचें."
+        reply_mr = "स्वागत आहे! पहिल्यांदा कर्ज घेणाऱ्यांसाठी: 1) ₹7.5 लाखांपर्यंतचे शिक्षण कर्ज सरकारच्या CSIS योजनेत सहसा collateral आवश्यक नसते. 2) गरज पडल्यास कमावणाऱ्या पालकांना co-borrower बनवा. 3) CIBIL स्वच्छ ठेवा आणि अनेक लोन अर्ज टाळा."
+        reply_gu = "સ્વાગત છે! પ્રથમ વખતના અરજીદારો માટે: 1) ₹7.5 લાખ સુધીની એજ્યુકેશન લોન પર સરકારની CSIS યોજનામાં ઘણીવાર collateral ની જરૂર નથી. 2) જરૂર હોય તો કમાવનાર માતા-પિતાને co-borrower બનાવો. 3) CIBIL સાફ રાખો અને ઘણી લોન અરજીઓ ટાળો."
+        reply_ta = "வணக்கம்! முதல் முறை விண்ணப்பதாரர்களுக்கு: 1) ₹7.5 லட்சம் வரையிலான கல்விக் கடனில் அரசின் CSIS திட்டத்தின் கீழ் பெரும்பாலும் collateral தேவையில்லை. 2) தேவைப்பட்டால் சம்பாதிக்கும் பெற்றோரை co-borrower ஆக சேர்க்கவும். 3) CIBIL ஐ சுத்தமாக வைத்திருங்கள் மற்றும் பல கடன் விண்ணப்பங்களை தவிர்க்கவும்."
 
     else:
-        reply_en = "I am your SmartLoan AI Financial Coach. Ask me about CIBIL score improvement, DTI ratios, hidden banking charges, required documents, or how to choose the right loan product for your financial situation!"
-        reply_hi = "मैं आपका स्मार्टलोन एआई वित्तीय सलाहकार हूँ। आप मुझसे सिबिल स्कोर सुधारने, DTI अनुपात, छिपे हुए शुल्कों या आवश्यक दस्तावेज़ों के बारे में कुछ भी पूछ सकते हैं!"
-        reply_mr = "मी तुमचा स्मार्टलोन एआय फायनान्शियल कोच आहे. सिबिल सुधारणा, DTI रेश्यो, लपलेले शुल्क किंवा आवश्यक कागदपत्रांबद्दल मला विचारा!"
-        reply_gu = "હું તમારો SmartLoan AI નાણાકીય સલાહકાર છું. CIBIL સ્કોર, DTI રેશિયો, છૂપા ચાર્જીસ અથવા દસ્તાવેજો વિશે મને ગમે તે પૂછો!"
-        reply_ta = "நான் உங்கள் SmartLoan AI நிதி ஆலோசகர். CIBIL மதிப்பெண், DTI விகிதம், மறைமுக கட்டணங்கள் மற்றும் தேவையான ஆவணங்கள் பற்றி என்னிடம் கேளுங்கள்!"
+        reply_en = "I am your SmartLoan AI Financial Coach. Ask me about CIBIL score improvement, DTI ratios, hidden banking charges, required documents, or how to choose the right loan product for your profile."
+        reply_hi = "मैं आपका स्मार्टलोन एआई वित्तीय सलाहकार हूँ। आप मुझसे CIBIL स्कोर में सुधार, DTI अनुपात, छिपे हुए बैंकिंग शुल्क, आवश्यक दस्तावेज़ या सही लोन का चुनाव पूछ सकते हैं।"
+        reply_mr = "मी तुमचा SmartLoan AI फायनान्शियल कोच आहे. CIBIL स्कोअर सुधारणा, DTI रेश्यो, लपलेले बँकिंग शुल्क, आवश्यक कागदपत्रे किंवा योग्य कर्ज निवड याबद्दल मला विचारा."
+        reply_gu = "હું તમારો SmartLoan AI ფინანს coach છું. CIBIL સ્કોર સુધારો, DTI રેશિયો, છૂપા બેંકિંગ ચાર્જીસ, જરૂરી દસ્તાવેજો અથવા તમારી પ્રોફાઇલ માટે યોગ્ય લોન પસંદ કરવા વિશે પૂછો."
+        reply_ta = "நான் உங்கள் SmartLoan AI நிதி ஆலோசகர். CIBIL மதிப்பெண் மேம்பாடு, DTI விகிதம், மறைமுக வங்கி கட்டணங்கள், தேவையான ஆவணங்கள் அல்லது உங்கள் சுயவிவரத்திற்கான சரியான கடனை தேர்ந்தெடுப்பது பற்றி கேளுங்கள்."
 
     responses = {
         'en': reply_en,
@@ -578,6 +610,7 @@ def coach_chat():
         'language': lang,
         'coach': 'SmartLoan AI Advisor'
     })
+
 
 # History API
 @app.route('/api/applications/history', methods=['GET'])
@@ -600,6 +633,7 @@ def get_history():
         history_data.append(app_dict)
     conn.close()
     return jsonify({'history': history_data})
+
 
 # Admin APIs: Manage Lenders
 @app.route('/api/admin/lenders', methods=['GET', 'POST'])
@@ -650,6 +684,7 @@ def admin_lenders():
         conn.commit()
         conn.close()
         return jsonify({'message': 'Lender product added successfully.'})
+
 
 @app.route('/api/admin/lenders/<int:lender_id>', methods=['GET', 'PUT', 'DELETE'])
 def admin_modify_lender(lender_id):
@@ -710,6 +745,7 @@ def admin_modify_lender(lender_id):
         conn.close()
         return jsonify({'message': 'Lender product updated successfully.'})
 
+
 # Admin API: Analytics
 @app.route('/api/admin/analytics', methods=['GET'])
 def admin_analytics():
@@ -750,6 +786,7 @@ def admin_analytics():
         'distribution': {row['loan_type']: row['cnt'] for row in apps_by_type}
     })
 
+
 # Admin API: Manage Users
 @app.route('/api/admin/users', methods=['GET'])
 def admin_users():
@@ -760,6 +797,7 @@ def admin_users():
     users = conn.execute("SELECT id, username, email, user_type, created_at FROM users").fetchall()
     conn.close()
     return jsonify({'users': [dict(u) for u in users]})
+
 
 @app.route('/api/admin/users/<int:user_id>', methods=['PUT', 'DELETE'])
 def admin_modify_user(user_id):
@@ -804,6 +842,7 @@ def admin_modify_user(user_id):
         conn.commit()
         conn.close()
         return jsonify({'message': 'User profile updated successfully.'})
+
 
 if __name__ == '__main__':
     # Initialize DB tables and seed data if missing
